@@ -1,0 +1,4 @@
+C:\Users\ragul.n_disprz\calender_app\obj\Debug\net8.0\calender_app.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ragul.n_disprz\calender_app\obj\Debug\net8.0\calender_app.AssemblyInfoInputs.cache
+C:\Users\ragul.n_disprz\calender_app\obj\Debug\net8.0\calender_app.AssemblyInfo.cs
+C:\Users\ragul.n_disprz\calender_app\obj\Debug\net8.0\calender_app.csproj.CoreCompileInputs.cache
