@@ -1,0 +1,27 @@
+.calendar-container {
+  position: relative;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background: #f9fafc;
+  min-height: 100vh;
+}
+
+.add-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #1976d2;
+  color: white;
+  font-size: 28px;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  transition: background 0.3s ease;
+}
+
+.add-btn:hover {
+  background-color: #1565c0;
+}
