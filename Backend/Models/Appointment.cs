@@ -1,7 +1,9 @@
 namespace backend.Models
+//models usually represents the table in the db
 {
-    public class Appointment
+    public class Appointment //create a table appointment
     {
+        //inside this all columns to the table
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }

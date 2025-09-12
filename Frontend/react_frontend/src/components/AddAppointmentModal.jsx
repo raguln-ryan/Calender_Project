@@ -12,34 +12,38 @@ const AddAppointmentModal = ({ onClose, selectedDate, onAdd }) => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const newAppointment = {
-      title,
-      description,
-      startTime: `${date}T${startTime}`,
-      endTime: `${date}T${endTime}`,
-    };
-
-    try {
-      await createAppointment(newAppointment);
-      onAdd();   // refresh list
-      onClose(); // close modal
-    } catch (err) {
-      console.error("Error creating appointment:", err);
-
-      if (err.response) {
-        if (err.response.status === 409) {
-          alert(err.response.data.message || "❌ Appointment conflict detected!");
-        } else {
-          alert(`❌ Failed: ${err.response.status} ${err.response.statusText}`);
-        }
-      } else {
-        alert("❌ Network error. Backend might be down.");
-      }
-    }
+  const newAppointment = {
+    title,
+    description,
+    startTime: `${date}T${startTime}`,
+    endTime: `${date}T${endTime}`,
   };
+
+  try {
+    await createAppointment(newAppointment);
+
+    // ✅ Show success popup
+    alert("✅ Appointment created successfully!");
+
+    onAdd();   // refresh list
+    onClose(); // close modal
+  } catch (err) {
+    console.error("Error creating appointment:", err);
+
+    if (err.response) {
+      if (err.response.status === 409) {
+        alert(err.response.data.message || "❌ Appointment conflict detected!");
+      } else {
+        alert(`❌ Failed: ${err.response.status} ${err.response.statusText}`);
+      }
+    } else {
+      alert("❌ Network error. Backend might be down.");
+    }
+  }
+};
 
   return (
     <div className="modal-overlay">
