@@ -22,18 +22,28 @@ const CalendarPage = () => {
 
   return (
     <div className="calendar-container">
-      <DateNavigator
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-      />
+      {/* 🔹 Header Section */}
+      <div className="calendar-header">
+        <div className="header-left">
+          <DateNavigator
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+          />
+        </div>
 
+        <h1 className="header-title">Appointment Calendar</h1>
+
+        <div className="header-right">
+          <button className="add-btn" onClick={() => setShowModal(true)}>
+            + Add Appointment
+          </button>
+        </div>
+      </div>
+
+      {/* 🔹 Appointment Slots */}
       <TimeSlotGrid appointments={appointments} />
 
-      {/* Floating + Button */}
-      <button className="add-btn" onClick={() => setShowModal(true)}>
-        +
-      </button>
-
+      {/* 🔹 Modal */}
       {showModal && (
         <AddAppointmentModal
           onClose={() => setShowModal(false)}
