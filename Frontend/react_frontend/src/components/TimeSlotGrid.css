@@ -1,23 +1,283 @@
-.grid-container {
-  border-top: 1px solid #ddd;
+/* Base styles for all views */
+.time-slot-grid {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dark-mode .time-slot-grid {
+  border-color: #444;
+}
+
+/* Day view styles */
+.day-view {
+  display: flex;
+  flex-direction: column;
 }
 
 .time-slot {
   display: flex;
+  padding: 10px;
   border-bottom: 1px solid #eee;
   min-height: 60px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.time-slot:hover {
+  background-color: #f5f5f5;
+}
+
+.dark-mode .time-slot:hover {
+  background-color: #333;
 }
 
 .time-label {
   width: 80px;
-  text-align: right;
-  padding-right: 10px;
-  font-size: 12px;
-  color: #555;
+  font-weight: bold;
 }
 
-.slot {
+.appointment-info {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.appointment-title {
+  font-weight: bold;
+}
+
+.appointment-description {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 5px;
+}
+
+.dark-mode .appointment-description {
+  color: #aaa;
+}
+
+/* Week view styles */
+.week-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.week-header {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+}
+
+.time-column-header {
+  width: 80px;
+  border-right: 1px solid #ddd;
+}
+
+.day-header {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.day-header:last-child {
+  border-right: none;
+}
+
+.day-name {
+  font-weight: bold;
+}
+
+.day-date {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.dark-mode .day-date {
+  color: #aaa;
+}
+
+.week-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.week-row {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  min-height: 60px;
+}
+
+.week-row:last-child {
+  border-bottom: none;
+}
+
+.week-cell {
   flex: 1;
   padding: 5px;
-  background: #fff;
+  border-right: 1px solid #ddd;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.week-cell:hover {
+  background-color: #f5f5f5;
+}
+
+.dark-mode .week-cell:hover {
+  background-color: #333;
+}
+
+.week-cell:last-child {
+  border-right: none;
+}
+
+/* Month view styles */
+.month-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.month-header {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+}
+
+.weekday-header {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(100px, auto);
+}
+
+.month-cell {
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.month-cell:hover {
+  background-color: #f5f5f5;
+}
+
+.dark-mode .month-cell:hover {
+  background-color: #333;
+}
+
+.month-cell:nth-child(7n) {
+  border-right: none;
+}
+
+.month-cell:nth-last-child(-n+7) {
+  border-bottom: none;
+}
+
+.other-month {
+  color: #aaa;
+  background-color: #f9f9f9;
+}
+
+.dark-mode .other-month {
+  color: #666;
+  background-color: #2a2a2a;
+}
+
+.date-number {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.day-appointments {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.month-appointment {
+  font-size: 0.8rem;
+  padding: 2px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.more-appointments {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+  margin-top: 2px;
+}
+
+.dark-mode .more-appointments {
+  color: #aaa;
+}
+
+/* Color coding for appointment types */
+.appointment-personal {
+  background-color: #bbdefb;
+}
+
+.appointment-work {
+  background-color: #c8e6c9;
+}
+
+.appointment-medical {
+  background-color: #ffcdd2;
+}
+
+.appointment-other {
+  background-color: #e1bee7;
+}
+
+.dark-mode .appointment-personal {
+  background-color: #1565c0;
+}
+
+.dark-mode .appointment-work {
+  background-color: #2e7d32;
+}
+
+.dark-mode .appointment-medical {
+  background-color: #c62828;
+}
+
+.dark-mode .appointment-other {
+  background-color: #6a1b9a;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .time-label {
+    width: 60px;
+    font-size: 0.9rem;
+  }
+  
+  .week-view .day-name {
+    font-size: 0.8rem;
+  }
+  
+  .week-view .day-date {
+    font-size: 0.7rem;
+  }
+  
+  .month-cell {
+    padding: 2px;
+  }
+  
+  .date-number {
+    font-size: 0.9rem;
+  }
+  
+  .month-appointment {
+    font-size: 0.7rem;
+  }
 }

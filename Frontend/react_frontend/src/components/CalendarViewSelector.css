@@ -1,0 +1,48 @@
+.calendar-view-selector {
+  display: flex;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.view-btn {
+  background-color: #f5f5f5;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.view-btn:not(:last-child) {
+  border-right: 1px solid #ddd;
+}
+
+.view-btn.active {
+  background-color: #2196f3;
+  color: white;
+}
+
+.view-btn:hover:not(.active) {
+  background-color: #e0e0e0;
+}
+
+.dark-mode .calendar-view-selector {
+  border-color: #444;
+}
+
+.dark-mode .view-btn {
+  background-color: #333;
+  color: #f0f0f0;
+}
+
+.dark-mode .view-btn:not(:last-child) {
+  border-right-color: #444;
+}
+
+.dark-mode .view-btn.active {
+  background-color: #1976d2;
+}
+
+.dark-mode .view-btn:hover:not(.active) {
+  background-color: #444;
+}

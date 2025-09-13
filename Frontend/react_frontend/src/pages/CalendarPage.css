@@ -1,42 +1,245 @@
+/* Base styles */
 .calendar-container {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* Header section */
 .calendar-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  position: relative;
   margin-bottom: 20px;
+  position: relative;
+  flex-wrap: wrap;
 }
 
-.header-left {
-  position: absolute;
-  left: 0;
+.left-section {
+  flex: 1;
+  max-width: 300px;
+  margin-right: 15px;
 }
 
-.header-title {
-  font-size: 24px;
-  font-weight: bold;
+.center-section {
+  flex: 2;
   text-align: center;
 }
 
-.header-right {
-  position: absolute;
-  right: 0;
+.center-section h1 {
+  margin: 0;
+  font-size: 1.8rem;
 }
 
-.add-btn {
-  background-color: #28a745;
+.right-section {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Add appointment button */
+.add-appointment-btn {
+  display: flex;
+  align-items: center;
+  background-color: #4caf50;
   color: white;
   border: none;
-  padding: 8px 14px;
-  font-size: 14px;
-  border-radius: 6px;
+  border-radius: 4px;
+  padding: 8px 16px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  white-space: nowrap;
 }
 
-.add-btn:hover {
-  background-color: #218838;
+.add-appointment-btn:hover {
+  background-color: #3e8e41;
+}
+
+.plus-icon {
+  font-size: 1.2rem;
+  margin-right: 5px;
+}
+
+/* Calendar controls */
+.calendar-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.date-selector input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Loading state */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* Dark mode styles */
+.dark-mode {
+  background-color: #222;
+  color: #f0f0f0;
+}
+
+.dark-mode .calendar-header,
+.dark-mode .calendar-controls {
+  border-color: #444;
+}
+
+.dark-mode .date-selector input {
+  background-color: #333;
+  color: #f0f0f0;
+  border-color: #555;
+}
+
+.dark-mode .add-appointment-btn {
+  background-color: #2e7d32;
+}
+
+.dark-mode .add-appointment-btn:hover {
+  background-color: #1b5e20;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .calendar-container {
+    padding: 15px;
+  }
+  
+  .left-section {
+    max-width: 250px;
+  }
+  
+  .center-section h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-container {
+    padding: 10px;
+  }
+  
+  .calendar-header {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  .left-section.hidden {
+    display: none;
+  }
+  
+  .left-section:not(.hidden) {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background-color: inherit;
+    z-index: 10;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: none;
+  }
+  
+  .center-section {
+    order: 1;
+    flex: 1;
+    text-align: center;
+  }
+  
+  .center-section h1 {
+    font-size: 1.3rem;
+  }
+  
+  .right-section {
+    order: 2;
+    flex: 0;
+  }
+  
+  .btn-text {
+    display: none;
+  }
+  
+  .calendar-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .date-selector {
+    width: 100%;
+  }
+  
+  .date-selector input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-container {
+    padding: 5px;
+  }
+  
+  .center-section h1 {
+    font-size: 1.1rem;
+  }
+  
+  .add-appointment-btn {
+    padding: 6px 12px;
+  }
+  
+  .plus-icon {
+    font-size: 1rem;
+    margin-right: 0;
+  }
+}
+
+/* Color coding for appointment types */
+.appointment-personal {
+  background-color: #bbdefb !important;
+}
+
+.appointment-work {
+  background-color: #c8e6c9 !important;
+}
+
+.appointment-medical {
+  background-color: #ffcdd2 !important;
+}
+
+.appointment-other {
+  background-color: #e1bee7 !important;
+}
+
+.dark-mode .appointment-personal {
+  background-color: #1565c0 !important;
+}
+
+.dark-mode .appointment-work {
+  background-color: #2e7d32 !important;
+}
+
+.dark-mode .appointment-medical {
+  background-color: #c62828 !important;
+}
+
+.dark-mode .appointment-other {
+  background-color: #6a1b9a !important;
 }
