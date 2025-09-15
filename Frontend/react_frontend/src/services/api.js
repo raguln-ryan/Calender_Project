@@ -1,33 +1,38 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api'; // Adjust to your API URL
+// Create Axios instance
+const api = axios.create({
+  baseURL: "http://localhost:5000/api", // Must match backend
+  headers: { "Content-Type": "application/json" },
+});
 
-// Create a new appointment
-export const createAppointment = async (appointmentData) => {
-  const response = await axios.post(`${API_URL}/appointments`, appointmentData);
-  return response.data;
+// Helper for safer requests
+const handleRequest = async (request) => {
+  try {
+    const response = await request();
+    return response.data;
+  } catch (error) {
+    console.error("Axios error details:", error);
+    console.error("Error response:", error.response); // Important!
+    throw new Error(
+      error.response?.data?.message || "Network error. Please try again."
+    );
+  }
 };
 
-// Get all appointments
-export const getAppointments = async () => {
-  const response = await axios.get(`${API_URL}/appointments`);
-  return response.data;
-};
 
-// Get appointments for a specific date
-export const getAppointmentsByDate = async (date) => {
-  const response = await axios.get(`${API_URL}/appointments/date/${date}`);
-  return response.data;
-};
+// API functions
+export const createAppointment = async (data) =>
+  handleRequest(() => api.post("/appointments", data));
 
-// Update an existing appointment
-export const updateAppointment = async (id, appointmentData) => {
-  const response = await axios.put(`${API_URL}/appointments/${id}`, appointmentData);
-  return response.data;
-};
+export const getAppointments = async () =>
+  handleRequest(() => api.get("/appointments"));
 
-// Delete an appointment
-export const deleteAppointment = async (id) => {
-  const response = await axios.delete(`${API_URL}/appointments/${id}`);
-  return response.data;
-};
+export const getAppointmentsByDate = async (date) =>
+  handleRequest(() => api.get(`/appointments/date/${date}`));
+
+export const updateAppointment = async (id, data) =>
+  handleRequest(() => api.put(`/appointments/${id}`, data));
+
+export const deleteAppointment = async (id) =>
+  handleRequest(() => api.delete(`/appointments/${id}`));

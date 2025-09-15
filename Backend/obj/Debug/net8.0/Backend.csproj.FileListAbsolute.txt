@@ -113,3 +113,5 @@ C:\Users\ragul.n_disprz\calender_app\Backend\bin\Debug\net8.0\Microsoft.Extensio
 C:\Users\ragul.n_disprz\calender_app\Backend\bin\Debug\net8.0\Microsoft.Extensions.Primitives.dll
 C:\Users\ragul.n_disprz\calender_app\Backend\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll
 C:\Users\ragul.n_disprz\calender_app\Backend\bin\Debug\net8.0\YamlDotNet.dll
+C:\Users\ragul.n_disprz\calender_app\Backend\bin\Debug\net8.0\package-lock.json
+C:\Users\ragul.n_disprz\calender_app\Backend\bin\Debug\net8.0\package.json

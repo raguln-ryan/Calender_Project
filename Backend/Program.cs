@@ -21,24 +21,39 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
+// ✅ Add CORS policy for React frontend
+// ✅ Update CORS policy for React frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", builder =>
+    {
+        builder.WithOrigins("http://localhost:3000") // React app URL
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
-// ✅ Enable Swagger always
+// ✅ Enable Swagger
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Appointments API v1");
-    options.RoutePrefix = "swagger"; // Swagger will be at /swagger
+    options.RoutePrefix = "swagger";
 });
 
-// ✅ Middleware order matters
+// ✅ Use CORS before routing
+app.UseCors("AllowReactApp");
+
+// ✅ Middleware
 app.UseRouting();
 app.UseAuthorization();
 
-// Map Controllers
+// Map controllers
 app.MapControllers();
 
-// ✅ Default route
+// Default API test route
 app.MapGet("/api", () => Results.Json(new
 {
     status = "ok",
