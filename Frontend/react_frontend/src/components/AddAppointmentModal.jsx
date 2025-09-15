@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { createAppointment, updateAppointment } from "../services/api";
 import "./AddAppointmentModal.css";
 
-const AddAppointmentModal = ({ 
-  onClose, 
-  selectedDate, 
-  onAdd, 
-  appointmentToEdit 
+const AddAppointmentModal = ({
+  onClose,
+  selectedDate,
+  onAdd,
+  appointmentToEdit
 }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -27,10 +27,11 @@ const AddAppointmentModal = ({
     }
   }, [appointmentToEdit]);
 
-  // Validation
-  const validateForm = () => {
+  // Real-time validation
+  useEffect(() => {
     const newErrors = {};
 
+    // 1️⃣ Title validation: letters + basic punctuation only, max 50
     if (!title.trim()) {
       newErrors.title = "Title is required.";
     } else if (title.length > 50) {
@@ -39,58 +40,51 @@ const AddAppointmentModal = ({
       newErrors.title = "Title can only contain letters and punctuation.";
     }
 
+    // 2️⃣ Description validation: letters, numbers, spaces, basic punctuation, max 100
     if (!description.trim()) {
       newErrors.description = "Description is required.";
-    } else if (description.length > 200) {
-      newErrors.description = "Description cannot exceed 200 characters.";
+    } else if (description.length > 100) {
+      newErrors.description = "Description cannot exceed 100 characters.";
+    } else if (!/^[a-zA-Z0-9\s.,!?-]+$/.test(description)) {
+      newErrors.description = "Description can only contain letters, numbers, and punctuation.";
     }
 
-    if (!startTime) {
-      newErrors.startTime = "Start time is required.";
-    }
-    if (!endTime) {
-      newErrors.endTime = "End time is required.";
-    }
+    // 3️⃣ End time after start time
     if (startTime && endTime && startTime >= endTime) {
       newErrors.endTime = "End time must be later than start time.";
     }
 
     setError(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  }, [title, description, startTime, endTime]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
 
-    try {
-      setIsSubmitting(true);
+    // If any validation error exists, prevent submission
+    if (Object.keys(error).length > 0 || !title || !description || !startTime || !endTime) return;
 
-      const startDateTime = new Date(`${date.toISOString().split("T")[0]}T${startTime}`);
-      const endDateTime = new Date(`${date.toISOString().split("T")[0]}T${endTime}`);
+    setIsSubmitting(true);
 
-      const appointmentData = {
-        title,
-        description,
-        startTime: startDateTime.toISOString(),
-        endTime: endDateTime.toISOString(),
-      };
+    const startDateTime = new Date(`${date.toISOString().split("T")[0]}T${startTime}`);
+    const endDateTime = new Date(`${date.toISOString().split("T")[0]}T${endTime}`);
 
-      if (appointmentToEdit) {
-        await updateAppointment(appointmentToEdit.id, appointmentData);
-      } else {
-        await createAppointment(appointmentData);
-      }
+    const appointmentData = {
+      title,
+      description,
+      startTime: startDateTime.toISOString(),
+      endTime: endDateTime.toISOString()
+    };
 
-      onAdd();
-      alert(`Appointment ${appointmentToEdit ? "updated" : "created"} successfully!`);
-      onClose();
-    } catch (error) {
-      console.error("Error saving appointment:", error);
-      setError({ submit: "Failed to save appointment. Please try again." });
-    } finally {
-      setIsSubmitting(false);
+    // 4️⃣ Directly call API, any error will propagate to console (no try-catch)
+    if (appointmentToEdit) {
+      await updateAppointment(appointmentToEdit.id, appointmentData);
+    } else {
+      await createAppointment(appointmentData);
     }
+
+    onAdd(); // refresh UI immediately
+    onClose();
+    setIsSubmitting(false);
   };
 
   return (
@@ -102,8 +96,6 @@ const AddAppointmentModal = ({
         </div>
 
         <form onSubmit={handleSubmit}>
-          {error.submit && <div className="error-message">{error.submit}</div>}
-
           {/* Title */}
           <div className="form-group">
             <label htmlFor="title">Title *</label>
@@ -140,9 +132,7 @@ const AddAppointmentModal = ({
                 value={date.toISOString().split("T")[0]}
                 onChange={(e) => {
                   const newDate = new Date(e.target.value);
-                  if (!isNaN(newDate)) {
-                    setDate(newDate);
-                  }
+                  if (!isNaN(newDate)) setDate(newDate);
                 }}
                 required
               />
@@ -165,7 +155,7 @@ const AddAppointmentModal = ({
               onChange={(e) => setStartTime(e.target.value)}
             >
               <option value="">Select start time</option>
-              {generateTimeOptions().map((timeOption) => (
+              {generateTimeOptions().map(timeOption => (
                 <option key={timeOption} value={timeOption}>
                   {formatTimeForDisplay(timeOption)}
                 </option>
@@ -183,7 +173,7 @@ const AddAppointmentModal = ({
               onChange={(e) => setEndTime(e.target.value)}
             >
               <option value="">Select end time</option>
-              {generateTimeOptions().map((timeOption) => (
+              {generateTimeOptions().map(timeOption => (
                 <option key={timeOption} value={timeOption}>
                   {formatTimeForDisplay(timeOption)}
                 </option>
@@ -194,20 +184,20 @@ const AddAppointmentModal = ({
 
           {/* Actions */}
           <div className="form-actions">
-            <button 
-              type="button" 
-              className="cancel-btn" 
+            <button
+              type="button"
+              className="cancel-btn"
               onClick={onClose}
               disabled={isSubmitting}
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="create-btn"
-              disabled={isSubmitting}
+              disabled={isSubmitting || Object.keys(error).length > 0}
             >
-              {isSubmitting ? "Saving..." : (appointmentToEdit ? "Update" : "Create")}
+              {isSubmitting ? "Saving..." : appointmentToEdit ? "Update" : "Create"}
             </button>
           </div>
         </form>
@@ -227,7 +217,7 @@ const generateTimeOptions = () => {
   return options;
 };
 
-// Format for dropdown
+// Format time for dropdown
 const formatTimeForDisplay = (time) => {
   const [hours, minutes] = time.split(":");
   const hour = parseInt(hours, 10);
