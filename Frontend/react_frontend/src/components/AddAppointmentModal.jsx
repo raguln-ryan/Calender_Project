@@ -5,72 +5,89 @@ import "./AddAppointmentModal.css";
 const AddAppointmentModal = ({ 
   onClose, 
   selectedDate, 
-  selectedTimeSlot, 
   onAdd, 
   appointmentToEdit 
 }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [time, setTime] = useState("");
-  const [type, setType] = useState("other"); // Default type
-  const [error, setError] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [date, setDate] = useState(selectedDate || new Date());
+  const [error, setError] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Initialize form with appointment data if editing
+  // Initialize form with existing data
   useEffect(() => {
     if (appointmentToEdit) {
       setTitle(appointmentToEdit.title || "");
       setDescription(appointmentToEdit.description || "");
-      setTime(appointmentToEdit.time || "");
-      setType(appointmentToEdit.type || "other");
-    } else if (selectedTimeSlot) {
-      setTime(selectedTimeSlot);
+      setStartTime(appointmentToEdit.startTime?.slice(11, 16) || "");
+      setEndTime(appointmentToEdit.endTime?.slice(11, 16) || "");
+      setDate(new Date(appointmentToEdit.startTime));
     }
-  }, [appointmentToEdit, selectedTimeSlot]);
+  }, [appointmentToEdit]);
+
+  // Validation
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!title.trim()) {
+      newErrors.title = "Title is required.";
+    } else if (title.length > 50) {
+      newErrors.title = "Title cannot exceed 50 characters.";
+    } else if (!/^[a-zA-Z\s.,!?-]+$/.test(title)) {
+      newErrors.title = "Title can only contain letters and punctuation.";
+    }
+
+    if (!description.trim()) {
+      newErrors.description = "Description is required.";
+    } else if (description.length > 200) {
+      newErrors.description = "Description cannot exceed 200 characters.";
+    }
+
+    if (!startTime) {
+      newErrors.startTime = "Start time is required.";
+    }
+    if (!endTime) {
+      newErrors.endTime = "End time is required.";
+    }
+    if (startTime && endTime && startTime >= endTime) {
+      newErrors.endTime = "End time must be later than start time.";
+    }
+
+    setError(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate form
-    if (!title.trim()) {
-      setError("Title is required");
-      return;
-    }
-    
-    if (!time) {
-      setError("Time is required");
-      return;
-    }
-    
+    if (!validateForm()) return;
+
     try {
       setIsSubmitting(true);
-      setError("");
-      
+
+      const startDateTime = new Date(`${date.toISOString().split("T")[0]}T${startTime}`);
+      const endDateTime = new Date(`${date.toISOString().split("T")[0]}T${endTime}`);
+
       const appointmentData = {
         title,
         description,
-        date: selectedDate.toISOString().split("T")[0],
-        time,
-        type
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
       };
-      
+
       if (appointmentToEdit) {
-        // Update existing appointment
         await updateAppointment(appointmentToEdit.id, appointmentData);
       } else {
-        // Create new appointment
         await createAppointment(appointmentData);
       }
-      
-      // Call onAdd to refresh appointments
+
       onAdd();
-      
-      // Show success message or notification
-      alert(`Appointment ${appointmentToEdit ? 'updated' : 'created'} successfully!`);
-      
+      alert(`Appointment ${appointmentToEdit ? "updated" : "created"} successfully!`);
+      onClose();
     } catch (error) {
       console.error("Error saving appointment:", error);
-      setError("Failed to save appointment. Please try again.");
+      setError({ submit: "Failed to save appointment. Please try again." });
     } finally {
       setIsSubmitting(false);
     }
@@ -80,27 +97,29 @@ const AddAppointmentModal = ({
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <h2>{appointmentToEdit ? "Edit Appointment" : "Add Appointment"}</h2>
+          <h2>{appointmentToEdit ? "Edit Appointment" : "Create Appointment"}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
-          {error && <div className="error-message">{error}</div>}
-          
+          {error.submit && <div className="error-message">{error.submit}</div>}
+
+          {/* Title */}
           <div className="form-group">
-            <label htmlFor="title">Title</label>
+            <label htmlFor="title">Title *</label>
             <input
               type="text"
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Appointment title"
-              required
             />
+            {error.title && <span className="error-text">{error.title}</span>}
           </div>
-          
+
+          {/* Description */}
           <div className="form-group">
-            <label htmlFor="description">Description (optional)</label>
+            <label htmlFor="description">Description *</label>
             <textarea
               id="description"
               value={description}
@@ -108,49 +127,72 @@ const AddAppointmentModal = ({
               placeholder="Add details about this appointment"
               rows="3"
             />
+            {error.description && <span className="error-text">{error.description}</span>}
           </div>
-          
-          <div className="form-group">
-            <label htmlFor="date">Date</label>
-            <input
-              type="date"
-              id="date"
-              value={selectedDate.toISOString().split("T")[0]}
-              disabled
-            />
+
+          {/* Date */}
+          <div className="form-group date-picker-group">
+            <label htmlFor="date">Date *</label>
+            <div className="date-input-wrapper">
+              <input
+                type="date"
+                id="date"
+                value={date.toISOString().split("T")[0]}
+                onChange={(e) => {
+                  const newDate = new Date(e.target.value);
+                  if (!isNaN(newDate)) {
+                    setDate(newDate);
+                  }
+                }}
+                required
+              />
+              <button
+                type="button"
+                className="calendar-btn"
+                onClick={() => document.getElementById("date").showPicker?.()}
+              >
+                📅
+              </button>
+            </div>
           </div>
-          
+
+          {/* Start Time */}
           <div className="form-group">
-            <label htmlFor="time">Time</label>
+            <label htmlFor="startTime">Start Time *</label>
             <select
-              id="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              required
+              id="startTime"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
             >
-              <option value="">Select a time</option>
+              <option value="">Select start time</option>
               {generateTimeOptions().map((timeOption) => (
                 <option key={timeOption} value={timeOption}>
                   {formatTimeForDisplay(timeOption)}
                 </option>
               ))}
             </select>
+            {error.startTime && <span className="error-text">{error.startTime}</span>}
           </div>
-          
+
+          {/* End Time */}
           <div className="form-group">
-            <label htmlFor="type">Appointment Type</label>
+            <label htmlFor="endTime">End Time *</label>
             <select
-              id="type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
+              id="endTime"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
             >
-              <option value="personal">Personal</option>
-              <option value="work">Work</option>
-              <option value="medical">Medical</option>
-              <option value="other">Other</option>
+              <option value="">Select end time</option>
+              {generateTimeOptions().map((timeOption) => (
+                <option key={timeOption} value={timeOption}>
+                  {formatTimeForDisplay(timeOption)}
+                </option>
+              ))}
             </select>
+            {error.endTime && <span className="error-text">{error.endTime}</span>}
           </div>
-          
+
+          {/* Actions */}
           <div className="form-actions">
             <button 
               type="button" 
@@ -162,10 +204,10 @@ const AddAppointmentModal = ({
             </button>
             <button 
               type="submit" 
-              className="save-btn"
+              className="create-btn"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Saving..." : (appointmentToEdit ? "Update" : "Save")}
+              {isSubmitting ? "Saving..." : (appointmentToEdit ? "Update" : "Create")}
             </button>
           </div>
         </form>
@@ -174,23 +216,23 @@ const AddAppointmentModal = ({
   );
 };
 
-// Helper function to generate time options for the select dropdown
+// Time options generator
 const generateTimeOptions = () => {
   const options = [];
   for (let hour = 0; hour <= 23; hour++) {
-    const formattedHour = hour.toString().padStart(2, '0');
+    const formattedHour = hour.toString().padStart(2, "0");
     options.push(`${formattedHour}:00`);
     options.push(`${formattedHour}:30`);
   }
   return options;
 };
 
-// Helper function to format time for display
+// Format for dropdown
 const formatTimeForDisplay = (time) => {
-  const [hours, minutes] = time.split(':');
+  const [hours, minutes] = time.split(":");
   const hour = parseInt(hours, 10);
-  const ampm = hour >= 12 ? 'PM' : 'AM';
-  const displayHour = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
   return `${displayHour}:${minutes} ${ampm}`;
 };
 

@@ -1,9 +1,6 @@
-
-using Microsoft.AspNetCore.Mvc;      // ✅ Needed for [ApiController], [HttpGet], [HttpPost], [HttpDelete], [FromBody]
-using Microsoft.EntityFrameworkCore; // ✅ Needed for EF Core (DbContext, LINQ async ops)
-using backend.Data;                  // ✅ Your DbContext
-using backend.Models;                // ✅ Your Appointment model
-
+using Microsoft.AspNetCore.Mvc;
+using backend.Models;
+using backend.Services;
 
 namespace backend.Controllers
 {
@@ -11,22 +8,18 @@ namespace backend.Controllers
     [Route("api/[controller]")]
     public class AppointmentsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IAppointmentService _service;
 
-        public AppointmentsController(AppDbContext context)
+        public AppointmentsController(IAppointmentService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // GET /api/appointments?date=2025-09-10
+        // GET /api/appointments?date=2025-09-15
         [HttpGet]
         public async Task<IActionResult> GetAppointments([FromQuery] DateTime date)
         {
-            var appointments = await _context.Appointments
-                .Where(a => a.StartTime.Date == date.Date)
-                .OrderBy(a => a.StartTime)
-                .ToListAsync();
-
+            var appointments = await _service.GetAppointmentsByDateAsync(date);
             return Ok(appointments);
         }
 
@@ -34,27 +27,23 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAppointment([FromBody] Appointment dto)
         {
-            var conflict = await _context.Appointments.AnyAsync(a =>
-                dto.StartTime < a.EndTime && dto.EndTime > a.StartTime);
-
-            if (conflict)
-                return Conflict(new { message = "Appointment conflict detected!" });
-
-            _context.Appointments.Add(dto);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetAppointments), new { date = dto.StartTime.Date }, dto);
+            try
+            {
+                var created = await _service.CreateAppointmentAsync(dto);
+                return CreatedAtAction(nameof(GetAppointments), new { date = dto.StartTime.Date }, created);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         // DELETE /api/appointments/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
-            var appointment = await _context.Appointments.FindAsync(id);
-            if (appointment == null) return NotFound();
-
-            _context.Appointments.Remove(appointment);
-            await _context.SaveChangesAsync();
+            var success = await _service.DeleteAppointmentAsync(id);
+            if (!success) return NotFound();
 
             return NoContent();
         }
