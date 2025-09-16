@@ -1,20 +1,18 @@
 import React from "react";
 
-const UpcomingAppointments = ({ appointments, selectedDate }) => {
-  const todayAppointments = appointments.filter(a =>
-    new Date(a.startTime).toDateString() === selectedDate.toDateString()
-  );
-
+const UpcomingAppointments = ({ appointments }) => {
   return (
     <div className="upcoming-appointments">
-      <h3>Upcoming Events</h3>
-      {todayAppointments.length === 0 ? (
-        <p>No appointments</p>
+      <h3>Upcoming Appointments</h3>
+      {appointments.length === 0 ? (
+        <p>No upcoming appointments</p>
       ) : (
         <ul>
-          {todayAppointments.map(a => (
+          {appointments.map((a) => (
             <li key={a.id}>
-              <strong>{a.title}</strong> ({new Date(a.startTime).toLocaleTimeString()} - {new Date(a.endTime).toLocaleTimeString()})
+              <strong>{a.title}</strong> <br />
+              {new Date(a.startTime).toLocaleString()} -{" "}
+              {new Date(a.endTime).toLocaleTimeString()}
             </li>
           ))}
         </ul>

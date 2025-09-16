@@ -1,151 +1,272 @@
-/* General container */
+/* =========================
+   GENERAL LAYOUT
+========================= */
 .calendar-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
+  background: #f9f9f9;
   color: #333;
+  transition: background 0.3s, color 0.3s;
 }
 
-.dark-mode {
-  background-color: #1a1a1a;
+.calendar-container.dark-mode {
+  background: #1e1e1e;
   color: #f1f1f1;
 }
 
-/* Header */
-.calendar-header {
+/* =========================
+   FLEX LAYOUT: SIDEBAR + MAIN
+========================= */
+.calendar-layout {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #fff;
-  border-bottom: 1px solid #ddd;
+  height: 100%;
+  width: 100%;
+  transition: all 0.3s ease-in-out;
 }
 
-.dark-mode .calendar-header {
-  background-color: #2c2c2c;
+/* Sidebar (Upcoming Appointments) */
+.upcoming-sidebar {
+  width: 0;
+  overflow: hidden;
+  background: #fff;
+  border-right: 1px solid #ddd;
+  transition: width 0.4s ease-in-out, padding 0.3s ease-in-out;
+}
+
+.upcoming-sidebar.open {
+  width: 320px; /* ✅ Increased width for more space */
+  padding: 15px;
+}
+
+.dark-mode .upcoming-sidebar {
+  background: #2a2a2a;
   border-color: #444;
 }
 
-/* Sections */
-.left-section {
+/* Main calendar content */
+.calendar-main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease-in-out;
 }
 
+/* =========================
+   HEADER
+========================= */
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #3f51b5;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Toggle upcoming sidebar button */
+.toggle-upcoming-btn {
+  background: #21f34ba5;
+  color: rgb(255, 255, 255);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: background 0.2s;
+}
+
+.toggle-upcoming-btn:hover {
+  background: #1976d2;
+}
+
+/* Center (title + navigation) */
 .center-section {
-  flex: 2;
+  flex: 1;
   text-align: center;
 }
 
-.right-section {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+.center-section h1 {
+  margin: 0;
+  font-size: 22px;
 }
 
-.hidden {
-  display: none;
-}
-
-/* Add appointment button */
-.add-appointment-btn {
-  display: flex;
-  align-items: center;
-  background-color: #007bff;
-  border: none;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.add-appointment-btn .plus-icon {
-  font-weight: bold;
-  margin-right: 5px;
-}
-
-.add-appointment-btn:hover {
-  background-color: #0056b3;
-}
-
-/* Calendar controls */
-.calendar-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  border-bottom: 1px solid #ddd;
-}
-
-.date-selector input[type="date"] {
-  padding: 5px 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-/* Date navigation */
 .date-navigation {
+  margin-top: 8px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-top: 5px;
+  justify-content: center;
+  gap: 12px;
 }
 
 .date-navigation button {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
   padding: 5px 10px;
-  margin: 0 5px;
+  font-size: 16px;
+  background: white;
+  color: #3f51b5;
+  border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+  transition: 0.2s;
 }
 
 .date-navigation button:hover {
-  background-color: #0056b3;
+  background: #f1f1f1;
 }
 
-.date-navigation span {
+/* Right (controls) */
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Add Appointment button */
+.add-appointment-btn {
+  background: #4caf50; /* Green */
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.add-appointment-btn:hover {
+  background: #388e3c;
+}
+
+.plus-icon {
+  font-size: 18px;
+}
+
+/* =========================
+   UPCOMING APPOINTMENTS LIST
+========================= */
+.upcoming-appointments {
+  font-size: 14px;
+}
+
+.upcoming-appointments h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
   font-weight: bold;
-  margin: 0 10px;
+}
+
+/* ✅ Changed to green cards */
+.upcoming-appointments ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.upcoming-appointments li {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: #4caf50; /* Green */
+  color: white;
+  border-left: 4px solid #2e7d32; /* Dark green accent */
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+.upcoming-appointments li:hover {
+  transform: scale(1.02);
+}
+
+.dark-mode .upcoming-appointments li {
+  background: #2e7d32;
+  border-left-color: #81c784;
+}
+
+/* =========================
+   CALENDAR CONTROLS
+========================= */
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #fafafa;
+  border-bottom: 1px solid #ddd;
+}
+
+.dark-mode .calendar-controls {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+.date-selector input {
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* =========================
+   CALENDAR GRID APPOINTMENTS
+========================= */
+.appointment {
+  background: #2196f3;
+  color: white;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.appointment:hover {
+  background: #1976d2;
+}
+
+.dark-mode .appointment {
+  background: #1565c0;
+  color: #e3f2fd;
+}
+
+/* =========================
+   LOADING
+========================= */
+.loading-container {
+  text-align: center;
+  padding: 20px;
   font-size: 16px;
 }
 
-/* Loading container */
-.loading-container {
-  padding: 20px;
-  text-align: center;
-}
-
-/* TimeSlotGrid styling (example) */
-.timeslot-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 5px;
-  padding: 20px;
-}
-
-.dark-mode .timeslot-grid {
-  background-color: #1f1f1f;
-}
-
-/* Responsive adjustments */
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 768px) {
-  .calendar-header {
+  .calendar-layout {
     flex-direction: column;
-    align-items: flex-start;
+  }
+
+  .upcoming-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 200;
+    width: 0;
+    transition: width 0.4s ease-in-out;
+  }
+
+  .upcoming-sidebar.open {
+    width: 250px;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
   }
 
   .calendar-controls {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .right-section {
-    margin-top: 10px;
+    gap: 8px;
   }
 }

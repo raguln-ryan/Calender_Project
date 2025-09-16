@@ -13,20 +13,19 @@ const handleRequest = async (request) => {
     return response.data;
   } catch (error) {
     console.error("Axios error details:", error);
-    console.error("Error response:", error.response); // Important!
+    console.error("Error response:", error.response); 
     throw new Error(
       error.response?.data?.message || "Network error. Please try again."
     );
   }
 };
 
-
 // API functions
 export const createAppointment = async (data) =>
   handleRequest(() => api.post("/appointments", data));
 
 export const getAppointments = async (date) =>
-  handleRequest(() => api.get("/appointments?date="+date));
+  handleRequest(() => api.get("/appointments?date=" + date));
 
 export const getAppointmentsByDate = async (date) =>
   handleRequest(() => api.get(`/appointments/date/${date}`));
@@ -36,3 +35,7 @@ export const updateAppointment = async (id, data) =>
 
 export const deleteAppointment = async (id) =>
   handleRequest(() => api.delete(`/appointments/${id}`));
+
+// ✅ New: Get upcoming appointments
+export const getUpcomingAppointments = async () =>
+  handleRequest(() => api.get("/appointments/upcoming"));
