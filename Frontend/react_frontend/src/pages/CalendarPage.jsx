@@ -109,12 +109,23 @@ const CalendarPage = () => {
     setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
   };
 
+  // 🔹 NEW: handle editing from UpcomingAppointments
+  const handleEditUpcoming = (appointment) => {
+    setSelectedAppointment(appointment); // pass appointment to modal
+    setSelectedTimeSlot(null); // not adding new slot
+    setShowModal(true); // open modal
+  };
+
   return (
     <div className={`calendar-container ${darkMode ? "dark-mode" : ""}`}>
       <div className="calendar-layout">
         {/* Collapsible Upcoming Sidebar */}
         <div className={`upcoming-sidebar ${showUpcoming ? "open" : ""}`}>
-          <UpcomingAppointments appointments={upcomingAppointments} />
+          {/* 🔹 Pass onEdit so UpcomingAppointments can trigger edit */}
+          <UpcomingAppointments
+            appointments={upcomingAppointments}
+            onEdit={handleEditUpcoming}
+          />
         </div>
 
         {/* Main Calendar Area */}
@@ -200,7 +211,7 @@ const CalendarPage = () => {
           selectedDate={selectedDate}
           selectedTimeSlot={selectedTimeSlot}
           onAdd={handleAppointmentAdded}
-          appointmentToEdit={selectedAppointment}
+          appointmentToEdit={selectedAppointment} // 🔹 support editing
         />
       )}
     </div>

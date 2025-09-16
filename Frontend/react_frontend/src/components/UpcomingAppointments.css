@@ -1,70 +1,50 @@
-.upcoming-appointments {
-  background-color: #f9f9f9;
+.upcoming-appointments ul {
+  list-style: none;
+  padding: 0;
+}
+
+.upcoming-appointments li {
+  background: #f8f9fa;
+  margin: 10px 0;
+  padding: 12px;
   border-radius: 8px;
-  padding: 15px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.dark-mode .upcoming-appointments {
-  background-color: #333;
+.appointment-info {
+  margin-bottom: 10px; /* space before buttons */
 }
 
-.upcoming-appointments h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1.2rem;
+.actions.below {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
 }
 
-.appointment-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.edit-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
-.appointment-item {
-  padding: 8px;
-  margin-bottom: 8px;
-  border-radius: 4px;
-  border-left: 4px solid #ccc;
+.edit-btn:hover {
+  background-color: #0056b3;
 }
 
-.appointment-date {
-  font-size: 0.8rem;
-  color: #666;
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
-.dark-mode .appointment-date {
-  color: #aaa;
-}
-
-.appointment-time {
-  font-weight: bold;
-}
-
-.appointment-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.no-appointments {
-  color: #888;
-  font-style: italic;
-}
-
-/* Color coding based on appointment type */
-.appointment-personal {
-  border-left-color: #2196f3;
-}
-
-.appointment-work {
-  border-left-color: #4caf50;
-}
-
-.appointment-medical {
-  border-left-color: #f44336;
-}
-
-.appointment-other {
-  border-left-color: #9c27b0;
+.delete-btn:hover {
+  background-color: #a71d2a;
 }
