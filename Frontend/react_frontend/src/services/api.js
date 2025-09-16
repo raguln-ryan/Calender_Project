@@ -36,6 +36,12 @@ export const updateAppointment = async (id, data) =>
 export const deleteAppointment = async (id) =>
   handleRequest(() => api.delete(`/appointments/${id}`));
 
-// ✅ New: Get upcoming appointments
-export const getUpcomingAppointments = async () =>
-  handleRequest(() => api.get("/appointments/upcoming"));
+// ✅ New: Get upcoming appointments for next N days
+export const getUpcomingAppointments = async (days = 3) => {
+  const today = new Date().toISOString().split("T")[0];
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() + days);
+  const end = endDate.toISOString().split("T")[0];
+
+  return handleRequest(() => api.get(`/appointments/upcoming?start=${today}&end=${end}`));
+};

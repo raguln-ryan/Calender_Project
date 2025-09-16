@@ -10,5 +10,7 @@ namespace backend.Repositories
         Task AddAsync(Appointment appointment);
         Task DeleteAsync(Appointment appointment);
         Task SaveChangesAsync();
+
+        Task<List<Appointment>> GetAppointmentsInRangeAsync(DateTime start, DateTime end); // ✅ new
     }
 }

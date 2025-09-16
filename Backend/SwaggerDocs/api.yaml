@@ -35,6 +35,30 @@ paths:
         '200':
           description: Success
   '/api/Appointments/{id}':
+    put:
+      tags:
+        - Appointments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+      responses:
+        '200':
+          description: Success
     delete:
       tags:
         - Appointments
@@ -48,14 +72,30 @@ paths:
       responses:
         '200':
           description: Success
+  /api/Appointments/upcoming:
+    get:
+      tags:
+        - Appointments
+      parameters:
+        - name: start
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Success
 components:
   schemas:
     Appointment:
       required:
-        - description
         - endTime
         - startTime
-        - title
       type: object
       properties:
         id:
@@ -65,10 +105,12 @@ components:
           maxLength: 100
           minLength: 0
           type: string
+          nullable: true
         description:
           maxLength: 500
           minLength: 0
           type: string
+          nullable: true
         startTime:
           type: string
           format: date-time

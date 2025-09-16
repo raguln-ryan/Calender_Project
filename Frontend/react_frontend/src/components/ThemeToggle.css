@@ -1,6 +1,15 @@
 .theme-toggle {
   display: flex;
+  flex-direction: column; /* ✅ Stack label on top */
   align-items: center;
+  gap: 4px;
+}
+
+.theme-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: white; /* matches header text */
+  letter-spacing: 0.5px;
 }
 
 .switch {

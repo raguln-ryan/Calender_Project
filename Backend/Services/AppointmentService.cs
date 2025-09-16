@@ -31,6 +31,26 @@ namespace backend.Services
             return dto;
         }
 
+        public async Task<Appointment> UpdateAppointmentAsync(int id, Appointment dto)
+        {
+            var appointment = await _repository.GetByIdAsync(id);
+            if (appointment == null)
+                throw new KeyNotFoundException("Appointment not found.");
+
+            // Check conflicts excluding itself
+            var conflict = await _repository.HasConflictAsync(dto.StartTime, dto.EndTime);
+            if (conflict && (dto.StartTime != appointment.StartTime || dto.EndTime != appointment.EndTime))
+                throw new InvalidOperationException("Appointment conflict detected!");
+
+            appointment.Title = dto.Title;
+            appointment.Description = dto.Description;
+            appointment.StartTime = dto.StartTime;
+            appointment.EndTime = dto.EndTime;
+
+            await _repository.SaveChangesAsync();
+            return appointment;
+        }
+
         public async Task<bool> DeleteAppointmentAsync(int id)
         {
             var appointment = await _repository.GetByIdAsync(id);
@@ -40,6 +60,11 @@ namespace backend.Services
             await _repository.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<List<Appointment>> GetUpcomingAppointmentsAsync(DateTime start, DateTime end)
+        {
+            return await _repository.GetAppointmentsInRangeAsync(start, end);
         }
     }
 }

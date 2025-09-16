@@ -69,7 +69,7 @@
 
 /* Toggle upcoming sidebar button */
 .toggle-upcoming-btn {
-  background: #21f34ba5;
+  background: #4caf50; /* Green */
   color: rgb(255, 255, 255);
   border: none;
   padding: 6px 12px;
@@ -173,7 +173,7 @@
   background: #4caf50; /* Green */
   color: white;
   border-left: 4px solid #2e7d32; /* Dark green accent */
-  border-radius: 4px;
+  border-radius: 6px;
   transition: transform 0.2s;
 }
 
@@ -211,26 +211,56 @@
 }
 
 /* =========================
+   CALENDAR GRID CELLS (NEW)
+========================= */
+/* =========================
+   CALENDAR GRID CELLS
+========================= */
+.calendar-grid td,
+.calendar-grid .calendar-cell {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  border-radius: 12px; /* ✅ Rounded squares */
+  background: #fff;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.calendar-grid td:hover,
+.calendar-grid .calendar-cell:hover {
+  background: #f1f1f1;
+  transform: scale(1.02); /* ✅ slight zoom effect */
+}
+
+.dark-mode .calendar-grid td,
+.dark-mode .calendar-grid .calendar-cell {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+/* =========================
    CALENDAR GRID APPOINTMENTS
 ========================= */
 .appointment {
-  background: #2196f3;
-  color: white;
+ background: #2196f3 !important;  /* ✅ Force Blue */
+  color: white !important;
   padding: 6px;
-  border-radius: 4px;
+  border-radius: 8px; /* rounded square */
   font-size: 13px;
   text-align: center;
   cursor: pointer;
+  transition: background 0.2s ease-in-out;
 }
 
 .appointment:hover {
-  background: #1976d2;
+  background: #1976d2 !important; /* ✅ Darker blue on hover */
 }
 
 .dark-mode .appointment {
-  background: #1565c0;
-  color: #e3f2fd;
+ background: #1565c0 !important; /* ✅ Dark blue for dark mode */
+  color: #e3f2fd !important;
 }
+
 
 /* =========================
    LOADING

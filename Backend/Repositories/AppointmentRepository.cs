@@ -21,6 +21,14 @@ namespace backend.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Appointment>> GetAppointmentsInRangeAsync(DateTime start, DateTime end)
+        {
+            return await _context.Appointments
+                .Where(a => a.StartTime.Date >= start.Date && a.StartTime.Date <= end.Date)
+                .OrderBy(a => a.StartTime)
+                .ToListAsync();
+        }
+
         public async Task<Appointment?> GetByIdAsync(int id)
         {
             return await _context.Appointments.FindAsync(id);
