@@ -7,7 +7,7 @@ import ThemeToggle from "../components/ThemeToggle";
 import CalendarViewSelector from "../components/CalendarViewSelector";
 import HamburgerMenu from "../components/HamburgerMenu";
 import "./CalendarPage.css";
-import moment from "moment"
+import moment from "moment";
 
 const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -26,7 +26,6 @@ const CalendarPage = () => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -34,18 +33,19 @@ const CalendarPage = () => {
   // Fetch appointments when component mounts or when selectedDate changes
   useEffect(() => {
     fetchAppointments();
-  }, [selectedDate]); // Add selectedDate as dependency to refresh when date changes
+  }, [selectedDate]);
 
   // Function to fetch appointments
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await getAppointments(moment(selectedDate).format("YYYY-MM-DD"));
-      console.log("Fetched appointments:", data); // Debug log
+      const data = await getAppointments(
+        moment(selectedDate).format("YYYY-MM-DD")
+      );
+      console.log("Fetched appointments:", data);
       setAppointments(data);
     } catch (error) {
       console.error("Error fetching appointments:", error);
-      // Handle error appropriately
     } finally {
       setLoading(false);
     }
@@ -54,10 +54,8 @@ const CalendarPage = () => {
   // Handle clicking on a time slot
   const handleSlotClick = (timeSlot, appointment) => {
     if (appointment) {
-      // If there's an appointment, set it for editing
       setSelectedAppointment(appointment);
     } else {
-      // If no appointment, prepare to create a new one
       setSelectedTimeSlot(timeSlot);
       setSelectedAppointment(null);
     }
@@ -78,7 +76,6 @@ const CalendarPage = () => {
 
   // Handle appointment added or updated
   const handleAppointmentAdded = () => {
-    // Refresh appointments immediately
     fetchAppointments();
     handleCloseModal();
   };
@@ -86,8 +83,7 @@ const CalendarPage = () => {
   // Toggle dark mode
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
-    // Apply dark mode class to body
-    document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle("dark-mode");
   };
 
   // Change calendar view
@@ -100,26 +96,41 @@ const CalendarPage = () => {
     setMenuOpen(!menuOpen);
   };
 
+  // Navigate to previous day
+  const goToPreviousDay = () => {
+    setSelectedDate((prev) => moment(prev).subtract(1, "day").toDate());
+  };
+
+  // Navigate to next day
+  const goToNextDay = () => {
+    setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
+  };
+
   return (
-    <div className={`calendar-container ${darkMode ? 'dark-mode' : ''}`}>
+    <div className={`calendar-container ${darkMode ? "dark-mode" : ""}`}>
       {/* Header section with title, add button, and theme toggle */}
       <header className="calendar-header">
         {isMobile && <HamburgerMenu isOpen={menuOpen} toggleMenu={toggleMenu} />}
         
-        {/* Left section - Upcoming appointments (hidden in mobile when menu closed) */}
-        <div className={`left-section ${isMobile && !menuOpen ? 'hidden' : ''}`}>
+        {/* Left section - Upcoming appointments */}
+        <div className={`left-section ${isMobile && !menuOpen ? "hidden" : ""}`}>
           <UpcomingAppointments appointments={appointments} />
         </div>
-        
-        {/* Center section - Title */}
+
+        {/* Center section - Title & date navigation */}
         <div className="center-section">
           <h1>Appointment Calendar</h1>
+          <div className="date-navigation">
+            <button onClick={goToPreviousDay}>&lt;</button>
+            <span>{moment(selectedDate).format("YYYY-MM-DD")}</span>
+            <button onClick={goToNextDay}>&gt;</button>
+          </div>
         </div>
-        
+
         {/* Right section - Add button and theme toggle */}
         <div className="right-section">
           <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-          <button 
+          <button
             className="add-appointment-btn"
             onClick={() => {
               setSelectedAppointment(null);
@@ -142,11 +153,7 @@ const CalendarPage = () => {
             onChange={(e) => handleDateChange(new Date(e.target.value))}
           />
         </div>
-        
-        <CalendarViewSelector 
-          currentView={calendarView} 
-          onViewChange={handleViewChange} 
-        />
+        <CalendarViewSelector currentView={calendarView} onViewChange={handleViewChange} />
       </div>
 
       {/* Time slot grid with loading state */}
