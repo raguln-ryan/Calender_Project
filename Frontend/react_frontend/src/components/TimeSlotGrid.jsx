@@ -2,26 +2,46 @@ import React from 'react';
 import './TimeSlotGrid.css';
 
 const TimeSlotGrid = ({ appointments, selectedDate, onSlotClick, view }) => {
-  // Render different views based on the 'view' prop
+  // Normalize appointments so that each has "date": "YYYY-MM-DD" and "time": "HH:mm"
+  const normalizedAppointments = normalizeAppointments(appointments);
+
+  console.log("normalizedAppointments:", normalizedAppointments);
+
   if (view === 'week') {
-    return renderWeekView(appointments, selectedDate, onSlotClick);
+    return renderWeekView(normalizedAppointments, selectedDate, onSlotClick);
   } else if (view === 'month') {
-    return renderMonthView(appointments, selectedDate, onSlotClick);
+    return renderMonthView(normalizedAppointments, selectedDate, onSlotClick);
   } else {
-    return renderDayView(appointments, selectedDate, onSlotClick);
+    return renderDayView(normalizedAppointments, selectedDate, onSlotClick);
   }
 };
 
+// Helper to normalize the appointment objects
+function normalizeAppointments(appts) {
+  return appts.map(app => {
+    const start = new Date(app.startTime);
+    const date = start.toISOString().split('T')[0];      // "YYYY-MM-DD"
+    const hours = start.getHours().toString().padStart(2, '0');
+    const mins = start.getMinutes().toString().padStart(2, '0');
+    const time = `${hours}:${mins}`;                     // "HH:mm"
+    return {
+      ...app,
+      date,
+      time,
+    };
+  });
+}
+
 // Day view rendering
 const renderDayView = (appointments, selectedDate, onSlotClick) => {
-  // Generate time slots for the day (e.g., 9 AM to 5 PM)
+  // Generate time slots for the day: every hour and every 30 min between 00:00 to 23:30
   const timeSlots = [];
   for (let hour = 0; hour <= 23; hour++) {
-    timeSlots.push(`${hour}:00`);
-    timeSlots.push(`${hour}:30`);
+    const hh = hour.toString().padStart(2, '0');
+    timeSlots.push(`${hh}:00`);
+    timeSlots.push(`${hh}:30`);
   }
 
-  // Filter appointments for the selected date
   const dateString = selectedDate.toISOString().split('T')[0];
   const appointmentsForDay = appointments.filter(
     appointment => appointment.date === dateString
@@ -33,7 +53,7 @@ const renderDayView = (appointments, selectedDate, onSlotClick) => {
         const appointment = appointmentsForDay.find(
           app => app.time === timeSlot
         );
-        
+
         return (
           <div 
             key={timeSlot}
@@ -70,10 +90,11 @@ const renderWeekView = (appointments, selectedDate, onSlotClick) => {
     weekDays.push(day);
   }
   
-  // Generate time slots
+  // Generate time slots: every hour
   const timeSlots = [];
   for (let hour = 0; hour <= 23; hour++) {
-    timeSlots.push(`${hour}:00`);
+    const hh = hour.toString().padStart(2, '0');
+    timeSlots.push(`${hh}:00`);
   }
   
   return (
@@ -122,62 +143,58 @@ const renderWeekView = (appointments, selectedDate, onSlotClick) => {
 
 // Month view rendering
 const renderMonthView = (appointments, selectedDate, onSlotClick) => {
-  // Get the first day of the month
-  const firstDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+  const year = selectedDate.getFullYear();
+  const month = selectedDate.getMonth();
   
-  // Get the last day of the month
-  const lastDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+  // First day of current month
+  const firstDay = new Date(year, month, 1);
+  // Last day of current month
+  const lastDay = new Date(year, month + 1, 0);
+  const firstDayOfWeek = firstDay.getDay(); // 0 = Sunday
   
-  // Get the day of the week for the first day (0 = Sunday, 6 = Saturday)
-  const firstDayOfWeek = firstDay.getDay();
-  
-  // Calculate total days to display (including days from previous/next months to fill the grid)
-  const totalDays = 42; // 6 rows of 7 days
-  
-  // Generate calendar days
+  const totalDays = 42; // 6 rows * 7 days
   const calendarDays = [];
   
-  // Add days from previous month
-  const prevMonthLastDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 0).getDate();
+  // Days from previous month
+  const prevMonthLastDate = new Date(year, month, 0).getDate();
   for (let i = 0; i < firstDayOfWeek; i++) {
-    const day = prevMonthLastDay - firstDayOfWeek + i + 1;
+    const dayNum = prevMonthLastDate - firstDayOfWeek + i + 1;
     calendarDays.push({
-      date: new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, day),
+      date: new Date(year, month - 1, dayNum),
       isCurrentMonth: false
     });
   }
   
-  // Add days from current month
+  // Days of current month
   for (let i = 1; i <= lastDay.getDate(); i++) {
     calendarDays.push({
-      date: new Date(selectedDate.getFullYear(), selectedDate.getMonth(), i),
+      date: new Date(year, month, i),
       isCurrentMonth: true
     });
   }
   
-  // Add days from next month
+  // Days of next month to fill grid
   const remainingDays = totalDays - calendarDays.length;
   for (let i = 1; i <= remainingDays; i++) {
     calendarDays.push({
-      date: new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, i),
+      date: new Date(year, month + 1, i),
       isCurrentMonth: false
     });
   }
   
-  // Days of the week headers
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
   return (
     <div className="time-slot-grid month-view">
       <div className="month-header">
-        {weekDays.map((day, index) => (
-          <div key={index} className="weekday-header">{day}</div>
+        {weekDayNames.map((wd, idx) => (
+          <div key={idx} className="weekday-header">{wd}</div>
         ))}
       </div>
       
       <div className="month-grid">
-        {calendarDays.map((day, index) => {
-          const dateString = day.date.toISOString().split('T')[0];
+        {calendarDays.map((dayObj, index) => {
+          const dateString = dayObj.date.toISOString().split('T')[0];
           const appointmentsForDay = appointments.filter(
             app => app.date === dateString
           );
@@ -185,13 +202,10 @@ const renderMonthView = (appointments, selectedDate, onSlotClick) => {
           return (
             <div 
               key={index}
-              className={`month-cell ${!day.isCurrentMonth ? 'other-month' : ''}`}
-              onClick={() => {
-                // Set the selected date to this day when clicked
-                onSlotClick(null, null);
-              }}
+              className={`month-cell ${!dayObj.isCurrentMonth ? 'other-month' : ''}`}
+              onClick={() => onSlotClick(null, null)}
             >
-              <div className="date-number">{day.date.getDate()}</div>
+              <div className="date-number">{dayObj.date.getDate()}</div>
               
               <div className="day-appointments">
                 {appointmentsForDay.slice(0, 3).map((appointment, appIndex) => (
@@ -206,7 +220,6 @@ const renderMonthView = (appointments, selectedDate, onSlotClick) => {
                     {appointment.title}
                   </div>
                 ))}
-                
                 {appointmentsForDay.length > 3 && (
                   <div className="more-appointments">
                     +{appointmentsForDay.length - 3} more

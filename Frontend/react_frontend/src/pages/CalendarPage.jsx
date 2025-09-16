@@ -7,6 +7,7 @@ import ThemeToggle from "../components/ThemeToggle";
 import CalendarViewSelector from "../components/CalendarViewSelector";
 import HamburgerMenu from "../components/HamburgerMenu";
 import "./CalendarPage.css";
+import moment from "moment"
 
 const CalendarPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -39,7 +40,7 @@ const CalendarPage = () => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await getAppointments();
+      const data = await getAppointments(moment(selectedDate).format("YYYY-MM-DD"));
       console.log("Fetched appointments:", data); // Debug log
       setAppointments(data);
     } catch (error) {

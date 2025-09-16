@@ -25,8 +25,8 @@ const handleRequest = async (request) => {
 export const createAppointment = async (data) =>
   handleRequest(() => api.post("/appointments", data));
 
-export const getAppointments = async () =>
-  handleRequest(() => api.get("/appointments"));
+export const getAppointments = async (date) =>
+  handleRequest(() => api.get("/appointments?date="+date));
 
 export const getAppointmentsByDate = async (date) =>
   handleRequest(() => api.get(`/appointments/date/${date}`));
