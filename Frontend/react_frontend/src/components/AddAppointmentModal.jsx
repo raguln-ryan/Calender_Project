@@ -13,8 +13,17 @@ const AddAppointmentModal = ({
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [date, setDate] = useState(selectedDate || new Date());
+  const [type, setType] = useState("Meeting"); // ✅ default type
   const [error, setError] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Color mapping for appointment types
+  const typeColors = {
+    Meeting: "#4CAF50",   // green
+    Call: "#2196F3",      // blue
+    Task: "#FF9800",      // orange
+    Personal: "#9C27B0"   // purple
+  };
 
   // Initialize form with existing data
   useEffect(() => {
@@ -24,6 +33,7 @@ const AddAppointmentModal = ({
       setStartTime(appointmentToEdit.startTime?.slice(11, 16) || "");
       setEndTime(appointmentToEdit.endTime?.slice(11, 16) || "");
       setDate(new Date(appointmentToEdit.startTime));
+      setType(appointmentToEdit.type || "Meeting"); // ✅ prefill type
     }
   }, [appointmentToEdit]);
 
@@ -31,7 +41,6 @@ const AddAppointmentModal = ({
   useEffect(() => {
     const newErrors = {};
 
-    // 1️⃣ Title validation: letters + basic punctuation only, max 50
     if (!title.trim()) {
       newErrors.title = "Title is required.";
     } else if (title.length > 50) {
@@ -40,7 +49,6 @@ const AddAppointmentModal = ({
       newErrors.title = "Title can only contain letters and punctuation.";
     }
 
-    // 2️⃣ Description validation: letters, numbers, spaces, basic punctuation, max 100
     if (!description.trim()) {
       newErrors.description = "Description is required.";
     } else if (description.length > 100) {
@@ -49,7 +57,6 @@ const AddAppointmentModal = ({
       newErrors.description = "Description can only contain letters, numbers, and punctuation.";
     }
 
-    // 3️⃣ End time after start time
     if (startTime && endTime && startTime >= endTime) {
       newErrors.endTime = "End time must be later than start time.";
     }
@@ -60,7 +67,6 @@ const AddAppointmentModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // If any validation error exists, prevent submission
     if (Object.keys(error).length > 0 || !title || !description || !startTime || !endTime) return;
 
     setIsSubmitting(true);
@@ -71,18 +77,19 @@ const AddAppointmentModal = ({
     const appointmentData = {
       title,
       description,
+      type, // ✅ include type
+      color: typeColors[type], // ✅ store color for easy styling
       startTime: startDateTime.toISOString(),
       endTime: endDateTime.toISOString()
     };
 
-    // 4️⃣ Directly call API, any error will propagate to console (no try-catch)
     if (appointmentToEdit) {
       await updateAppointment(appointmentToEdit.id, appointmentData);
     } else {
       await createAppointment(appointmentData);
     }
 
-    onAdd(); // refresh UI immediately
+    onAdd();
     onClose();
     setIsSubmitting(false);
   };
@@ -105,6 +112,7 @@ const AddAppointmentModal = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Appointment title"
+              required
             />
             {error.title && <span className="error-text">{error.title}</span>}
           </div>
@@ -118,8 +126,27 @@ const AddAppointmentModal = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add details about this appointment"
               rows="3"
+              required
             />
             {error.description && <span className="error-text">{error.description}</span>}
+          </div>
+
+          {/* Appointment Type */}
+          <div className="form-group">
+            <label htmlFor="type">Type *</label>
+            <select
+              id="type"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              style={{ borderLeft: `10px solid ${typeColors[type]}` }} // ✅ show color in dropdown
+              required
+            >
+              {Object.keys(typeColors).map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Date */}
@@ -153,6 +180,7 @@ const AddAppointmentModal = ({
               id="startTime"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
+              required
             >
               <option value="">Select start time</option>
               {generateTimeOptions().map(timeOption => (
@@ -161,7 +189,6 @@ const AddAppointmentModal = ({
                 </option>
               ))}
             </select>
-            {error.startTime && <span className="error-text">{error.startTime}</span>}
           </div>
 
           {/* End Time */}
@@ -171,6 +198,7 @@ const AddAppointmentModal = ({
               id="endTime"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
+              required
             >
               <option value="">Select end time</option>
               {generateTimeOptions().map(timeOption => (
@@ -196,6 +224,7 @@ const AddAppointmentModal = ({
               type="submit"
               className="create-btn"
               disabled={isSubmitting || Object.keys(error).length > 0}
+              style={{ backgroundColor: typeColors[type] }} // ✅ button color matches type
             >
               {isSubmitting ? "Saving..." : appointmentToEdit ? "Update" : "Create"}
             </button>

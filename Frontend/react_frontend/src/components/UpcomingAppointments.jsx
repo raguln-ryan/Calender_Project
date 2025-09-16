@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getUpcomingAppointments, deleteAppointment } from "../services/api";
-import "./UpcomingAppointments.css"; // keep styling here
+import "./UpcomingAppointments.css";
 
 const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
   const [appointments, setAppointments] = useState([]);
@@ -53,14 +53,22 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
       ) : (
         <ul>
           {appointments.map((a) => (
-            <li key={a.id}>
+            <li
+              key={a.id}
+              className="appointment-card"
+              style={{
+                backgroundColor: a.color || "#3f51b5", // ✅ fallback if no color
+                borderLeft: `8px solid ${a.color || "#3f51b5"}`
+              }}
+            >
               <div className="appointment-info">
                 <strong>{a.title}</strong> <br />
-                {new Date(a.startTime).toLocaleString()} -{" "}
+                <span className="type-badge">{a.type || "General"}</span> <br />
+                {new Date(a.startTime).toLocaleString()} –{" "}
                 {new Date(a.endTime).toLocaleTimeString()}
               </div>
 
-              {/* 🔹 Buttons now placed below */}
+              {/* Buttons below the appointment */}
               <div className="actions below">
                 <button className="edit-btn" onClick={() => onEdit && onEdit(a)}>
                   ✏️ Edit
