@@ -24,12 +24,12 @@
   font-size: 12px;
   font-weight: bold;
 }
-
 .actions.below {
   display: flex;
-  gap: 10px;
+  justify-content: center; /* Centers horizontally */
+  gap: 10px; /* Adds space between buttons */
+  margin-top: 10px; /* Optional, to add spacing */
 }
-
 .edit-btn,
 .delete-btn {
   border: none;
@@ -40,11 +40,11 @@
 }
 
 .edit-btn {
-  background-color: #2196f3;
-  color: white;
+  background-color: white;
+  color: black;
 }
 
 .delete-btn {
-  background-color: #f44336;
-  color: white;
+  background-color: white;
+  color: black;
 }

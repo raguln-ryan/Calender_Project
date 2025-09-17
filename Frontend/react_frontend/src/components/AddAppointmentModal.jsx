@@ -13,19 +13,18 @@ const AddAppointmentModal = ({
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [date, setDate] = useState(selectedDate || new Date());
-  const [type, setType] = useState("Meeting"); // ✅ default type
+  const [type, setType] = useState("Meeting");
   const [error, setError] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [popupError, setPopupError] = useState(""); // ✅ NEW state for popup error
 
-  // Color mapping for appointment types
   const typeColors = {
-    Meeting: "#4CAF50",   // green
-    Call: "#2196F3",      // blue
-    Task: "#FF9800",      // orange
-    Personal: "#9C27B0"   // purple
+    Meeting: "#4CAF50",
+    Call: "#2196F3",
+    Task: "#FF9800",
+    Personal: "#9C27B0"
   };
 
-  // Initialize form with existing data
   useEffect(() => {
     if (appointmentToEdit) {
       setTitle(appointmentToEdit.title || "");
@@ -33,14 +32,12 @@ const AddAppointmentModal = ({
       setStartTime(appointmentToEdit.startTime?.slice(11, 16) || "");
       setEndTime(appointmentToEdit.endTime?.slice(11, 16) || "");
       setDate(new Date(appointmentToEdit.startTime));
-      setType(appointmentToEdit.type || "Meeting"); // ✅ prefill type
+      setType(appointmentToEdit.type || "Meeting");
     }
   }, [appointmentToEdit]);
 
-  // Real-time validation
   useEffect(() => {
     const newErrors = {};
-
     if (!title.trim()) {
       newErrors.title = "Title is required.";
     } else if (title.length > 50) {
@@ -48,7 +45,6 @@ const AddAppointmentModal = ({
     } else if (!/^[a-zA-Z\s.,!?-]+$/.test(title)) {
       newErrors.title = "Title can only contain letters and punctuation.";
     }
-
     if (!description.trim()) {
       newErrors.description = "Description is required.";
     } else if (description.length > 100) {
@@ -56,11 +52,9 @@ const AddAppointmentModal = ({
     } else if (!/^[a-zA-Z0-9\s.,!?-]+$/.test(description)) {
       newErrors.description = "Description can only contain letters, numbers, and punctuation.";
     }
-
     if (startTime && endTime && startTime >= endTime) {
       newErrors.endTime = "End time must be later than start time.";
     }
-
     setError(newErrors);
   }, [title, description, startTime, endTime]);
 
@@ -70,6 +64,7 @@ const AddAppointmentModal = ({
     if (Object.keys(error).length > 0 || !title || !description || !startTime || !endTime) return;
 
     setIsSubmitting(true);
+    setPopupError(""); // reset popup error
 
     const startDateTime = new Date(`${date.toISOString().split("T")[0]}T${startTime}`);
     const endDateTime = new Date(`${date.toISOString().split("T")[0]}T${endTime}`);
@@ -77,21 +72,30 @@ const AddAppointmentModal = ({
     const appointmentData = {
       title,
       description,
-      type, // ✅ include type
-      color: typeColors[type], // ✅ store color for easy styling
+      type,
+      color: typeColors[type],
       startTime: startDateTime.toISOString(),
       endTime: endDateTime.toISOString()
     };
 
-    if (appointmentToEdit) {
-      await updateAppointment(appointmentToEdit.id, appointmentData);
-    } else {
-      await createAppointment(appointmentData);
+    try {
+      if (appointmentToEdit) {
+        await updateAppointment(appointmentToEdit.id, appointmentData);
+      } else {
+        await createAppointment(appointmentData);
+      }
+      onAdd();
+      onClose();
+    } catch (err) {
+      console.error("Error saving appointment:", err);
+      if (err.response && err.response.data && err.response.data.message) {
+        setPopupError(err.response.data.message); // ✅ show backend conflict msg
+      } else {
+        setPopupError("Appointment Conflict Detected.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-
-    onAdd();
-    onClose();
-    setIsSubmitting(false);
   };
 
   return (
@@ -101,6 +105,14 @@ const AddAppointmentModal = ({
           <h2>{appointmentToEdit ? "Edit Appointment" : "Create Appointment"}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
+
+        {/* ✅ Popup error box */}
+        {popupError && (
+          <div className="popup-error">
+            {popupError}
+            <button className="close-error" onClick={() => setPopupError("")}>✖</button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           {/* Title */}
@@ -131,20 +143,18 @@ const AddAppointmentModal = ({
             {error.description && <span className="error-text">{error.description}</span>}
           </div>
 
-          {/* Appointment Type */}
+          {/* Type */}
           <div className="form-group">
             <label htmlFor="type">Type *</label>
             <select
               id="type"
               value={type}
               onChange={(e) => setType(e.target.value)}
-              style={{ borderLeft: `10px solid ${typeColors[type]}` }} // ✅ show color in dropdown
+              style={{ borderLeft: `10px solid ${typeColors[type]}` }}
               required
             >
               {Object.keys(typeColors).map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
+                <option key={t} value={t}>{t}</option>
               ))}
             </select>
           </div>
@@ -224,7 +234,7 @@ const AddAppointmentModal = ({
               type="submit"
               className="create-btn"
               disabled={isSubmitting || Object.keys(error).length > 0}
-              style={{ backgroundColor: typeColors[type] }} // ✅ button color matches type
+              style={{ backgroundColor: typeColors[type] }}
             >
               {isSubmitting ? "Saving..." : appointmentToEdit ? "Update" : "Create"}
             </button>

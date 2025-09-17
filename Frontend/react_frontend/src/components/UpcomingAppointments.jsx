@@ -42,7 +42,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
 
   return (
     <div className="upcoming-appointments">
-      <h3>Upcoming Appointments (Next 3 Days)</h3>
+      <h3>📅 Upcoming Appointments</h3>
 
       {loading ? (
         <p>Loading...</p>

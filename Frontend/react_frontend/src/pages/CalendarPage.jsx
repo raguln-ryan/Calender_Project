@@ -135,11 +135,12 @@ const CalendarPage = () => {
             <button
               className="toggle-upcoming-btn"
               onClick={() => setShowUpcoming(!showUpcoming)}
-            >
+            ><span style={{ fontSize: "1.2rem", marginRight: "6px" }}>📌</span>
               {showUpcoming
                 ? "Hide Upcoming Appointments"
                 : "Show Upcoming Appointments"}
             </button>
+
 
             {/* Center - Title & date navigation */}
             <div className="center-section">
