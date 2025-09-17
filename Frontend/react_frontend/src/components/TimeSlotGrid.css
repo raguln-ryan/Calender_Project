@@ -281,3 +281,25 @@
     font-size: 0.7rem;
   }
 }
+
+/* Drag-over highlight */
+.time-slot.drag-over,
+.week-cell.drag-over,
+.month-cell.drag-over {
+  outline: 3px dashed rgba(33, 150, 243, 0.7);
+  background-color: rgba(33, 150, 243, 0.04);
+}
+
+/* Make month appointment draggable feel */
+.month-appointment[draggable="true"] {
+  user-select: none;
+}
+
+/* Ensure appointment-info items show pointer while dragging */
+.appointment-info[draggable="true"] {
+  cursor: grab;
+}
+
+.appointment-info[draggable="true"]:active {
+  cursor: grabbing;
+}

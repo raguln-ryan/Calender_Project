@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  getAppointments,
-  getUpcomingAppointments,
-  updateAppointment
-} from "../services/api";
+import { getAppointments, getUpcomingAppointments, updateAppointment } from "../services/api";
 import TimeSlotGrid from "../components/TimeSlotGrid";
 import AddAppointmentModal from "../components/AddAppointmentModal";
 import UpcomingAppointments from "../components/UpcomingAppointments";
@@ -25,7 +21,7 @@ const CalendarPage = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [popupMessage, setPopupMessage] = useState(""); // ✅ popup message
+  const [popupMessage, setPopupMessage] = useState(""); // popup message
 
   // Auto-hide popup after 3 seconds
   useEffect(() => {
@@ -49,27 +45,18 @@ const CalendarPage = () => {
     fetchUpcomingAppointments();
   }, []);
 
-  // ✅ Keyboard shortcuts
+  // Keyboard shortcuts (kept from your version)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return; // ignore typing
-
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
       switch (e.key) {
         case "ArrowLeft":
           e.preventDefault();
-          setSelectedDate(prev =>
-            e.shiftKey
-              ? moment(prev).subtract(1, "week").toDate()
-              : moment(prev).subtract(1, "day").toDate()
-          );
+          setSelectedDate((prev) => (e.shiftKey ? moment(prev).subtract(1, "week").toDate() : moment(prev).subtract(1, "day").toDate()));
           break;
         case "ArrowRight":
           e.preventDefault();
-          setSelectedDate(prev =>
-            e.shiftKey
-              ? moment(prev).add(1, "week").toDate()
-              : moment(prev).add(1, "day").toDate()
-          );
+          setSelectedDate((prev) => (e.shiftKey ? moment(prev).add(1, "week").toDate() : moment(prev).add(1, "day").toDate()));
           break;
         case "d":
         case "D":
@@ -96,7 +83,6 @@ const CalendarPage = () => {
           break;
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showModal]);
@@ -104,9 +90,7 @@ const CalendarPage = () => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await getAppointments(
-        moment(selectedDate).format("YYYY-MM-DD")
-      );
+      const data = await getAppointments(moment(selectedDate).format("YYYY-MM-DD"));
       setAppointments(data);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -142,9 +126,9 @@ const CalendarPage = () => {
   };
 
   const handleAppointmentAdded = (newAppointment, isEdit = false) => {
-    setAppointments(prev => {
+    setAppointments((prev) => {
       if (isEdit) {
-        return prev.map(app => app.id === newAppointment.id ? newAppointment : app);
+        return prev.map((app) => (app.id === newAppointment.id ? newAppointment : app));
       } else {
         return [...prev, newAppointment];
       }
@@ -160,11 +144,9 @@ const CalendarPage = () => {
 
   const handleViewChange = (view) => setCalendarView(view);
 
-  const goToPreviousDay = () =>
-    setSelectedDate(prev => moment(prev).subtract(1, "day").toDate());
+  const goToPreviousDay = () => setSelectedDate((prev) => moment(prev).subtract(1, "day").toDate());
 
-  const goToNextDay = () =>
-    setSelectedDate(prev => moment(prev).add(1, "day").toDate());
+  const goToNextDay = () => setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
 
   const handleEditUpcoming = (appointment) => {
     setSelectedAppointment(appointment);
@@ -172,18 +154,12 @@ const CalendarPage = () => {
     setShowModal(true);
   };
 
-  const filteredAppointments = appointments.filter(
-    a =>
-      a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.type?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAppointments = appointments.filter((a) => a.title?.toLowerCase().includes(searchQuery.toLowerCase()) || a.type?.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  // Move appointment instantly
+  // Move appointment instantly (called by TimeSlotGrid on drop)
   const handleMoveAppointment = async (appointmentId, newDate, newTime) => {
     try {
-      const appointmentIndex = appointments.findIndex(
-        a => a.id === parseInt(appointmentId)
-      );
+      const appointmentIndex = appointments.findIndex((a) => a.id === parseInt(appointmentId));
       if (appointmentIndex === -1) return;
 
       const appointment = appointments[appointmentIndex];
@@ -196,11 +172,12 @@ const CalendarPage = () => {
       const updatedAppointment = {
         ...appointment,
         startTime: newStart.toISOString(),
-        endTime: newEnd.toISOString()
+        endTime: newEnd.toISOString(),
       };
 
       await updateAppointment(appointment.id, updatedAppointment);
 
+      // Update state locally so all views reflect change immediately
       const newAppointments = [...appointments];
       newAppointments[appointmentIndex] = updatedAppointment;
       setAppointments(newAppointments);
@@ -219,24 +196,20 @@ const CalendarPage = () => {
       {popupMessage && (
         <div className="popup-message">
           {popupMessage}
-          <button className="close-popup" onClick={() => setPopupMessage("")}>✖</button>
+          <button className="close-popup" onClick={() => setPopupMessage("")}>
+            ✖
+          </button>
         </div>
       )}
 
       <div className="calendar-layout">
         <div className={`upcoming-sidebar ${showUpcoming ? "open" : ""}`}>
-          <UpcomingAppointments
-            appointments={upcomingAppointments}
-            onEdit={handleEditUpcoming}
-          />
+          <UpcomingAppointments appointments={upcomingAppointments} onEdit={handleEditUpcoming} />
         </div>
 
         <div className="calendar-main">
           <header className="calendar-header">
-            <button
-              className="toggle-upcoming-btn"
-              onClick={() => setShowUpcoming(!showUpcoming)}
-            >
+            <button className="toggle-upcoming-btn" onClick={() => setShowUpcoming(!showUpcoming)}>
               <span style={{ fontSize: "1.2rem", marginRight: "6px" }}>📌</span>
               {showUpcoming ? "Hide Upcoming Appointments" : "Show Upcoming Appointments"}
             </button>
@@ -268,16 +241,9 @@ const CalendarPage = () => {
 
           <div className="calendar-controls">
             <div className="date-selector">
-              <input
-                type="date"
-                value={selectedDate.toISOString().split("T")[0]}
-                onChange={e => handleDateChange(new Date(e.target.value))}
-              />
+              <input type="date" value={selectedDate.toISOString().split("T")[0]} onChange={(e) => handleDateChange(new Date(e.target.value))} />
             </div>
-            <CalendarViewSelector
-              currentView={calendarView}
-              onViewChange={handleViewChange}
-            />
+            <CalendarViewSelector currentView={calendarView} onViewChange={handleViewChange} />
           </div>
 
           {loading ? (
@@ -285,26 +251,13 @@ const CalendarPage = () => {
               <p>Loading appointments...</p>
             </div>
           ) : (
-            <TimeSlotGrid
-              appointments={filteredAppointments}
-              selectedDate={selectedDate}
-              onSlotClick={handleSlotClick}
-              view={calendarView}
-              onMoveAppointment={handleMoveAppointment}
-            />
+            <TimeSlotGrid appointments={filteredAppointments} selectedDate={selectedDate} onSlotClick={handleSlotClick} view={calendarView} onMoveAppointment={handleMoveAppointment} />
           )}
         </div>
       </div>
 
       {showModal && (
-        <AddAppointmentModal
-          onClose={handleCloseModal}
-          selectedDate={selectedDate}
-          selectedTimeSlot={selectedTimeSlot}
-          onAdd={handleAppointmentAdded}
-          appointmentToEdit={selectedAppointment}
-          setPopupMessage={setPopupMessage}
-        />
+        <AddAppointmentModal onClose={handleCloseModal} selectedDate={selectedDate} selectedTimeSlot={selectedTimeSlot} onAdd={handleAppointmentAdded} appointmentToEdit={selectedAppointment} setPopupMessage={setPopupMessage} />
       )}
     </div>
   );
