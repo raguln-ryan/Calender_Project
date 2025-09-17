@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   getAppointments,
   getUpcomingAppointments,
+  updateAppointment
 } from "../services/api";
 import TimeSlotGrid from "../components/TimeSlotGrid";
 import AddAppointmentModal from "../components/AddAppointmentModal";
@@ -23,26 +24,82 @@ const CalendarPage = () => {
   const [calendarView, setCalendarView] = useState("day");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showUpcoming, setShowUpcoming] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // 🔹 search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [popupMessage, setPopupMessage] = useState(""); // ✅ popup message
 
-  // Resize listener
+  // Auto-hide popup after 3 seconds
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    if (popupMessage) {
+      const timer = setTimeout(() => setPopupMessage(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [popupMessage]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Fetch appointments for selected date
   useEffect(() => {
     fetchAppointments();
   }, [selectedDate]);
 
-  // Fetch upcoming appointments
   useEffect(() => {
     fetchUpcomingAppointments();
   }, []);
+
+  // ✅ Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return; // ignore typing
+
+      switch (e.key) {
+        case "ArrowLeft":
+          e.preventDefault();
+          setSelectedDate(prev =>
+            e.shiftKey
+              ? moment(prev).subtract(1, "week").toDate()
+              : moment(prev).subtract(1, "day").toDate()
+          );
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          setSelectedDate(prev =>
+            e.shiftKey
+              ? moment(prev).add(1, "week").toDate()
+              : moment(prev).add(1, "day").toDate()
+          );
+          break;
+        case "d":
+        case "D":
+          setCalendarView("day");
+          break;
+        case "w":
+        case "W":
+          setCalendarView("week");
+          break;
+        case "m":
+        case "M":
+          setCalendarView("month");
+          break;
+        case "n":
+        case "N":
+          setSelectedAppointment(null);
+          setSelectedTimeSlot(null);
+          setShowModal(true);
+          break;
+        case "Escape":
+          if (showModal) setShowModal(false);
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showModal]);
 
   const fetchAppointments = async () => {
     try {
@@ -68,18 +125,15 @@ const CalendarPage = () => {
   };
 
   const handleSlotClick = (timeSlot, appointment) => {
-    if (appointment) {
-      setSelectedAppointment(appointment);
-    } else {
+    if (appointment) setSelectedAppointment(appointment);
+    else {
       setSelectedTimeSlot(timeSlot);
       setSelectedAppointment(null);
     }
     setShowModal(true);
   };
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
+  const handleDateChange = (date) => setSelectedDate(date);
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -87,8 +141,14 @@ const CalendarPage = () => {
     setSelectedAppointment(null);
   };
 
-  const handleAppointmentAdded = () => {
-    fetchAppointments();
+  const handleAppointmentAdded = (newAppointment, isEdit = false) => {
+    setAppointments(prev => {
+      if (isEdit) {
+        return prev.map(app => app.id === newAppointment.id ? newAppointment : app);
+      } else {
+        return [...prev, newAppointment];
+      }
+    });
     fetchUpcomingAppointments();
     handleCloseModal();
   };
@@ -98,36 +158,72 @@ const CalendarPage = () => {
     document.body.classList.toggle("dark-mode");
   };
 
-  const handleViewChange = (view) => {
-    setCalendarView(view);
-  };
+  const handleViewChange = (view) => setCalendarView(view);
 
-  const goToPreviousDay = () => {
-    setSelectedDate((prev) => moment(prev).subtract(1, "day").toDate());
-  };
+  const goToPreviousDay = () =>
+    setSelectedDate(prev => moment(prev).subtract(1, "day").toDate());
 
-  const goToNextDay = () => {
-    setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
-  };
+  const goToNextDay = () =>
+    setSelectedDate(prev => moment(prev).add(1, "day").toDate());
 
-  // 🔹 NEW: handle editing from UpcomingAppointments
   const handleEditUpcoming = (appointment) => {
     setSelectedAppointment(appointment);
     setSelectedTimeSlot(null);
     setShowModal(true);
   };
 
-  // 🔹 Filter appointments by search
   const filteredAppointments = appointments.filter(
-    (a) =>
+    a =>
       a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.type?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Move appointment instantly
+  const handleMoveAppointment = async (appointmentId, newDate, newTime) => {
+    try {
+      const appointmentIndex = appointments.findIndex(
+        a => a.id === parseInt(appointmentId)
+      );
+      if (appointmentIndex === -1) return;
+
+      const appointment = appointments[appointmentIndex];
+      const duration = new Date(appointment.endTime) - new Date(appointment.startTime);
+      const [hours, minutes] = newTime.split(":");
+      const newStart = new Date(newDate);
+      newStart.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      const newEnd = new Date(newStart.getTime() + duration);
+
+      const updatedAppointment = {
+        ...appointment,
+        startTime: newStart.toISOString(),
+        endTime: newEnd.toISOString()
+      };
+
+      await updateAppointment(appointment.id, updatedAppointment);
+
+      const newAppointments = [...appointments];
+      newAppointments[appointmentIndex] = updatedAppointment;
+      setAppointments(newAppointments);
+
+      fetchUpcomingAppointments();
+      setPopupMessage("Appointment moved successfully!");
+    } catch (error) {
+      console.error("Failed to move appointment:", error);
+      setPopupMessage("Could not move appointment. Conflict exists!");
+    }
+  };
+
   return (
     <div className={`calendar-container ${darkMode ? "dark-mode" : ""}`}>
+      {/* Popup message */}
+      {popupMessage && (
+        <div className="popup-message">
+          {popupMessage}
+          <button className="close-popup" onClick={() => setPopupMessage("")}>✖</button>
+        </div>
+      )}
+
       <div className="calendar-layout">
-        {/* Collapsible Upcoming Sidebar */}
         <div className={`upcoming-sidebar ${showUpcoming ? "open" : ""}`}>
           <UpcomingAppointments
             appointments={upcomingAppointments}
@@ -135,7 +231,6 @@ const CalendarPage = () => {
           />
         </div>
 
-        {/* Main Calendar Area */}
         <div className="calendar-main">
           <header className="calendar-header">
             <button
@@ -143,9 +238,7 @@ const CalendarPage = () => {
               onClick={() => setShowUpcoming(!showUpcoming)}
             >
               <span style={{ fontSize: "1.2rem", marginRight: "6px" }}>📌</span>
-              {showUpcoming
-                ? "Hide Upcoming Appointments"
-                : "Show Upcoming Appointments"}
+              {showUpcoming ? "Hide Upcoming Appointments" : "Show Upcoming Appointments"}
             </button>
 
             <div className="center-section">
@@ -158,10 +251,7 @@ const CalendarPage = () => {
             </div>
 
             <div className="right-section">
-              <ThemeToggle
-                darkMode={darkMode}
-                toggleDarkMode={toggleDarkMode}
-              />
+              <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
               <button
                 className="add-appointment-btn"
                 onClick={() => {
@@ -176,15 +266,12 @@ const CalendarPage = () => {
             </div>
           </header>
 
-         
-
-          {/* Calendar controls */}
           <div className="calendar-controls">
             <div className="date-selector">
               <input
                 type="date"
                 value={selectedDate.toISOString().split("T")[0]}
-                onChange={(e) => handleDateChange(new Date(e.target.value))}
+                onChange={e => handleDateChange(new Date(e.target.value))}
               />
             </div>
             <CalendarViewSelector
@@ -199,10 +286,11 @@ const CalendarPage = () => {
             </div>
           ) : (
             <TimeSlotGrid
-              appointments={filteredAppointments} // 🔹 use filtered list
+              appointments={filteredAppointments}
               selectedDate={selectedDate}
               onSlotClick={handleSlotClick}
               view={calendarView}
+              onMoveAppointment={handleMoveAppointment}
             />
           )}
         </div>
@@ -215,6 +303,7 @@ const CalendarPage = () => {
           selectedTimeSlot={selectedTimeSlot}
           onAdd={handleAppointmentAdded}
           appointmentToEdit={selectedAppointment}
+          setPopupMessage={setPopupMessage}
         />
       )}
     </div>

@@ -4,9 +4,10 @@ import "./AddAppointmentModal.css";
 
 const AddAppointmentModal = ({
   onClose,
-  selectedDate,
+  selectedDate,      // ✅ clicked date from week/month view
   onAdd,
-  appointmentToEdit
+  appointmentToEdit,
+  setPopupMessage
 }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -16,7 +17,6 @@ const AddAppointmentModal = ({
   const [type, setType] = useState("Meeting");
   const [error, setError] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [popupError, setPopupError] = useState(""); // ✅ NEW state for popup error
 
   const typeColors = {
     Meeting: "#4CAF50",
@@ -25,6 +25,24 @@ const AddAppointmentModal = ({
     Personal: "#9C27B0"
   };
 
+  // ✅ Sync date if parent changes selectedDate (week/month click)
+  useEffect(() => {
+    if (selectedDate) {
+      setDate(new Date(selectedDate));
+    }
+  }, [selectedDate]);
+  // Inside AddAppointmentModal component
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // ✅ Load data if editing existing appointment
   useEffect(() => {
     if (appointmentToEdit) {
       setTitle(appointmentToEdit.title || "");
@@ -36,38 +54,37 @@ const AddAppointmentModal = ({
     }
   }, [appointmentToEdit]);
 
+  // ✅ Validation (only if user types)
   useEffect(() => {
     const newErrors = {};
-    if (!title.trim()) {
-      newErrors.title = "Title is required.";
-    } else if (title.length > 50) {
-      newErrors.title = "Title cannot exceed 50 characters.";
-    } else if (!/^[a-zA-Z\s.,!?-]+$/.test(title)) {
-      newErrors.title = "Title can only contain letters and punctuation.";
+    if (title.trim()) {
+      if (title.length > 50) newErrors.title = "Title cannot exceed 50 characters.";
+      else if (!/^[a-zA-Z\s.,!?-]+$/.test(title))
+        newErrors.title = "Title can only contain letters and punctuation.";
     }
-    if (!description.trim()) {
-      newErrors.description = "Description is required.";
-    } else if (description.length > 100) {
-      newErrors.description = "Description cannot exceed 100 characters.";
-    } else if (!/^[a-zA-Z0-9\s.,!?-]+$/.test(description)) {
-      newErrors.description = "Description can only contain letters, numbers, and punctuation.";
+    if (description.trim()) {
+      if (description.length > 100)
+        newErrors.description = "Description cannot exceed 100 characters.";
+      else if (!/^[a-zA-Z0-9\s.,!?-]+$/.test(description))
+        newErrors.description = "Description can only contain letters, numbers, and punctuation.";
     }
-    if (startTime && endTime && startTime >= endTime) {
+    if (startTime && endTime && startTime >= endTime)
       newErrors.endTime = "End time must be later than start time.";
-    }
+
     setError(newErrors);
   }, [title, description, startTime, endTime]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (Object.keys(error).length > 0 || !title || !description || !startTime || !endTime) return;
+    if (Object.keys(error).length > 0 || !title || !startTime || !endTime)
+      return;
 
     setIsSubmitting(true);
-    setPopupError(""); // reset popup error
 
-    const startDateTime = new Date(`${date.toISOString().split("T")[0]}T${startTime}`);
-    const endDateTime = new Date(`${date.toISOString().split("T")[0]}T${endTime}`);
+    // ✅ Ensure appointment is created on selectedDate
+    const formattedDate = date.toISOString().split("T")[0];
+    const startDateTime = new Date(`${formattedDate}T${startTime}`);
+    const endDateTime = new Date(`${formattedDate}T${endTime}`);
 
     const appointmentData = {
       title,
@@ -79,19 +96,23 @@ const AddAppointmentModal = ({
     };
 
     try {
+      let savedAppointment;
       if (appointmentToEdit) {
-        await updateAppointment(appointmentToEdit.id, appointmentData);
+        savedAppointment = await updateAppointment(appointmentToEdit.id, appointmentData);
+        setPopupMessage?.("Appointment updated successfully!");
       } else {
-        await createAppointment(appointmentData);
+        savedAppointment = await createAppointment(appointmentData);
+        setPopupMessage?.("Appointment created successfully!");
       }
-      onAdd();
+
+      onAdd(savedAppointment, !!appointmentToEdit);
       onClose();
     } catch (err) {
       console.error("Error saving appointment:", err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setPopupError(err.response.data.message); // ✅ show backend conflict msg
+      if (err.response?.data?.message) {
+        setPopupMessage?.(err.response.data.message);
       } else {
-        setPopupError("Appointment Conflict Detected.");
+        setPopupMessage?.("Appointment conflict detected.");
       }
     } finally {
       setIsSubmitting(false);
@@ -105,14 +126,6 @@ const AddAppointmentModal = ({
           <h2>{appointmentToEdit ? "Edit Appointment" : "Create Appointment"}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
-
-        {/* ✅ Popup error box */}
-        {popupError && (
-          <div className="popup-error">
-            {popupError}
-            <button className="close-error" onClick={() => setPopupError("")}>✖</button>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           {/* Title */}
@@ -131,14 +144,13 @@ const AddAppointmentModal = ({
 
           {/* Description */}
           <div className="form-group">
-            <label htmlFor="description">Description *</label>
+            <label htmlFor="description">Description</label>
             <textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add details about this appointment"
               rows="3"
-              required
             />
             {error.description && <span className="error-text">{error.description}</span>}
           </div>
@@ -151,7 +163,6 @@ const AddAppointmentModal = ({
               value={type}
               onChange={(e) => setType(e.target.value)}
               style={{ borderLeft: `10px solid ${typeColors[type]}` }}
-              required
             >
               {Object.keys(typeColors).map((t) => (
                 <option key={t} value={t}>{t}</option>
@@ -159,28 +170,16 @@ const AddAppointmentModal = ({
             </select>
           </div>
 
-          {/* Date */}
+          {/* Date (auto-filled from selectedDate) */}
           <div className="form-group date-picker-group">
             <label htmlFor="date">Date *</label>
-            <div className="date-input-wrapper">
-              <input
-                type="date"
-                id="date"
-                value={date.toISOString().split("T")[0]}
-                onChange={(e) => {
-                  const newDate = new Date(e.target.value);
-                  if (!isNaN(newDate)) setDate(newDate);
-                }}
-                required
-              />
-              <button
-                type="button"
-                className="calendar-btn"
-                onClick={() => document.getElementById("date").showPicker?.()}
-              >
-                📅
-              </button>
-            </div>
+            <input
+              type="date"
+              id="date"
+              value={date.toISOString().split("T")[0]}
+              onChange={(e) => setDate(new Date(e.target.value))}
+              required
+            />
           </div>
 
           {/* Start Time */}
@@ -193,10 +192,8 @@ const AddAppointmentModal = ({
               required
             >
               <option value="">Select start time</option>
-              {generateTimeOptions().map(timeOption => (
-                <option key={timeOption} value={timeOption}>
-                  {formatTimeForDisplay(timeOption)}
-                </option>
+              {generateTimeOptions().map(t => (
+                <option key={t} value={t}>{formatTimeForDisplay(t)}</option>
               ))}
             </select>
           </div>
@@ -211,25 +208,15 @@ const AddAppointmentModal = ({
               required
             >
               <option value="">Select end time</option>
-              {generateTimeOptions().map(timeOption => (
-                <option key={timeOption} value={timeOption}>
-                  {formatTimeForDisplay(timeOption)}
-                </option>
+              {generateTimeOptions().map(t => (
+                <option key={t} value={t}>{formatTimeForDisplay(t)}</option>
               ))}
             </select>
             {error.endTime && <span className="error-text">{error.endTime}</span>}
           </div>
 
-          {/* Actions */}
           <div className="form-actions">
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
+            <button type="button" className="cancel-btn" onClick={onClose} disabled={isSubmitting}>Cancel</button>
             <button
               type="submit"
               className="create-btn"
@@ -245,18 +232,15 @@ const AddAppointmentModal = ({
   );
 };
 
-// Time options generator
 const generateTimeOptions = () => {
   const options = [];
   for (let hour = 0; hour <= 23; hour++) {
-    const formattedHour = hour.toString().padStart(2, "0");
-    options.push(`${formattedHour}:00`);
-    options.push(`${formattedHour}:30`);
+    options.push(`${hour.toString().padStart(2, "0")}:00`);
+    options.push(`${hour.toString().padStart(2, "0")}:30`);
   }
   return options;
 };
 
-// Format time for dropdown
 const formatTimeForDisplay = (time) => {
   const [hours, minutes] = time.split(":");
   const hour = parseInt(hours, 10);

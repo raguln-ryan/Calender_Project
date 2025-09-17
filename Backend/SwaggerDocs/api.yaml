@@ -93,9 +93,6 @@ paths:
 components:
   schemas:
     Appointment:
-      required:
-        - endTime
-        - startTime
       type: object
       properties:
         id:
