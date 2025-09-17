@@ -53,6 +53,25 @@
 }
 
 /* =========================
+   SEARCH INPUT
+========================= */
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  margin: 10px 0 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  border-color: #2196f3;
+  box-shadow: 0 0 4px rgba(33, 150, 243, 0.4);
+}
+
+/* =========================
    HEADER
 ========================= */
 .calendar-header {

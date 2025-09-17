@@ -23,6 +23,7 @@ const CalendarPage = () => {
   const [calendarView, setCalendarView] = useState("day");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showUpcoming, setShowUpcoming] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // 🔹 search state
 
   // Resize listener
   useEffect(() => {
@@ -111,17 +112,23 @@ const CalendarPage = () => {
 
   // 🔹 NEW: handle editing from UpcomingAppointments
   const handleEditUpcoming = (appointment) => {
-    setSelectedAppointment(appointment); // pass appointment to modal
-    setSelectedTimeSlot(null); // not adding new slot
-    setShowModal(true); // open modal
+    setSelectedAppointment(appointment);
+    setSelectedTimeSlot(null);
+    setShowModal(true);
   };
+
+  // 🔹 Filter appointments by search
+  const filteredAppointments = appointments.filter(
+    (a) =>
+      a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.type?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className={`calendar-container ${darkMode ? "dark-mode" : ""}`}>
       <div className="calendar-layout">
         {/* Collapsible Upcoming Sidebar */}
         <div className={`upcoming-sidebar ${showUpcoming ? "open" : ""}`}>
-          {/* 🔹 Pass onEdit so UpcomingAppointments can trigger edit */}
           <UpcomingAppointments
             appointments={upcomingAppointments}
             onEdit={handleEditUpcoming}
@@ -131,18 +138,16 @@ const CalendarPage = () => {
         {/* Main Calendar Area */}
         <div className="calendar-main">
           <header className="calendar-header">
-            {/* Toggle upcoming sidebar button */}
             <button
               className="toggle-upcoming-btn"
               onClick={() => setShowUpcoming(!showUpcoming)}
-            ><span style={{ fontSize: "1.2rem", marginRight: "6px" }}>📌</span>
+            >
+              <span style={{ fontSize: "1.2rem", marginRight: "6px" }}>📌</span>
               {showUpcoming
                 ? "Hide Upcoming Appointments"
                 : "Show Upcoming Appointments"}
             </button>
 
-
-            {/* Center - Title & date navigation */}
             <div className="center-section">
               <h1>Appointment Calendar</h1>
               <div className="date-navigation">
@@ -152,7 +157,6 @@ const CalendarPage = () => {
               </div>
             </div>
 
-            {/* Right - Controls */}
             <div className="right-section">
               <ThemeToggle
                 darkMode={darkMode}
@@ -172,15 +176,15 @@ const CalendarPage = () => {
             </div>
           </header>
 
+         
+
           {/* Calendar controls */}
           <div className="calendar-controls">
             <div className="date-selector">
               <input
                 type="date"
                 value={selectedDate.toISOString().split("T")[0]}
-                onChange={(e) =>
-                  handleDateChange(new Date(e.target.value))
-                }
+                onChange={(e) => handleDateChange(new Date(e.target.value))}
               />
             </div>
             <CalendarViewSelector
@@ -189,14 +193,13 @@ const CalendarPage = () => {
             />
           </div>
 
-          {/* Time slot grid */}
           {loading ? (
             <div className="loading-container">
               <p>Loading appointments...</p>
             </div>
           ) : (
             <TimeSlotGrid
-              appointments={appointments}
+              appointments={filteredAppointments} // 🔹 use filtered list
               selectedDate={selectedDate}
               onSlotClick={handleSlotClick}
               view={calendarView}
@@ -205,14 +208,13 @@ const CalendarPage = () => {
         </div>
       </div>
 
-      {/* Add/Edit modal */}
       {showModal && (
         <AddAppointmentModal
           onClose={handleCloseModal}
           selectedDate={selectedDate}
           selectedTimeSlot={selectedTimeSlot}
           onAdd={handleAppointmentAdded}
-          appointmentToEdit={selectedAppointment} // 🔹 support editing
+          appointmentToEdit={selectedAppointment}
         />
       )}
     </div>

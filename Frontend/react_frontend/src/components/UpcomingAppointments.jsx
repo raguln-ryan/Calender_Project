@@ -6,6 +6,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // 🔹 search state
 
   const fetchAppointments = async () => {
     try {
@@ -40,19 +41,35 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     }
   };
 
+  // 🔹 Filter appointments by title or type
+  const filteredAppointments = appointments.filter(
+    (a) =>
+      a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.type?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="upcoming-appointments">
       <h3>📅 Upcoming Appointments</h3>
+
+      {/* 🔹 Search bar */}
+      <input
+        type="text"
+        placeholder="Search appointments..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="search-input"
+      />
 
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
         <p className="error-text">{error}</p>
-      ) : appointments.length === 0 ? (
-        <p>No upcoming appointments.</p>
+      ) : filteredAppointments.length === 0 ? (
+        <p>No appointments found.</p>
       ) : (
         <ul>
-          {appointments.map((a) => (
+          {filteredAppointments.map((a) => (
             <li
               key={a.id}
               className="appointment-card"
