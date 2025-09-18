@@ -347,3 +347,54 @@
   font-size: 1.2rem;
 }
 
+/* ✅ New hamburger button */
+.hamburger-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 12px;
+}
+
+/* ✅ Mobile drawer sidebar */
+@media (max-width: 768px) {
+  .calendar-layout {
+    flex-direction: column;
+  }
+
+  .upcoming-sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px; /* hidden */
+    width: 250px;
+    height: 100%;
+    background: white;
+    transition: left 0.3s ease-in-out;
+    z-index: 200;
+  }
+
+  .upcoming-sidebar.open {
+    left: 0; /* slide in */
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .calendar-main {
+    width: 100%;
+  }
+
+  .calendar-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 500; /* make sure it's behind sidebar but above page */
+}
