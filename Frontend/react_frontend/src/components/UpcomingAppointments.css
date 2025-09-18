@@ -48,3 +48,74 @@
   background-color: white;
   color: black;
 }
+.upcoming-appointments {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* 🔹 Sticky search bar at the top */
+.search-container {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  padding: 6px 0;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* 🔹 Scrollable appointment list */
+.appointments-list {
+  flex: 1;
+  max-height: 400px; /* adjust as needed */
+  overflow-y: auto;
+  margin-top: 10px;
+  padding-right: 6px;
+}
+
+/* Appointment card styles */
+.appointment-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.appointment-info {
+  flex: 1;
+}
+
+.actions.below {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 🔹 Mobile responsiveness */
+@media (max-width: 768px) {
+  .appointment-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions.below {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 8px;
+  }
+}

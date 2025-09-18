@@ -6,13 +6,13 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchQuery, setSearchQuery] = useState(""); // 🔹 search state
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchAppointments = async () => {
     try {
       setLoading(true);
       const data = await getUpcomingAppointments(3); // next 3 days
-      setAppointments(data);
+      setAppointments(data || []);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -41,25 +41,30 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     }
   };
 
-  // 🔹 Filter appointments by title or type
-  const filteredAppointments = appointments.filter(
-    (a) =>
-      a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.type?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // 🔹 Filter appointments safely
+  const filteredAppointments = appointments.filter((a) => {
+    const title = a?.title?.toLowerCase() || "";
+    const type = a?.type?.toLowerCase() || "";
+    return (
+      title.includes(searchQuery.toLowerCase()) ||
+      type.includes(searchQuery.toLowerCase())
+    );
+  });
 
   return (
     <div className="upcoming-appointments">
       <h3>📅 Upcoming Appointments</h3>
 
-      {/* 🔹 Search bar */}
-      <input
-        type="text"
-        placeholder="Search appointments..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="search-input"
-      />
+      {/* 🔹 Sticky search bar */}
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Search appointments..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
+        />
+      </div>
 
       {loading ? (
         <p>Loading...</p>
@@ -68,26 +73,30 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
       ) : filteredAppointments.length === 0 ? (
         <p>No appointments found.</p>
       ) : (
-        <ul>
+        <ul className="appointments-list">
           {filteredAppointments.map((a) => (
             <li
               key={a.id}
               className="appointment-card"
               style={{
-                backgroundColor: a.color || "#3f51b5", // ✅ fallback if no color
+                backgroundColor: a.color || "#3f51b5",
                 borderLeft: `8px solid ${a.color || "#3f51b5"}`
               }}
             >
               <div className="appointment-info">
-                <strong>{a.title}</strong> <br />
+                <strong className="appointment-title">{a.title}</strong> <br />
                 <span className="type-badge">{a.type || "General"}</span> <br />
-                {new Date(a.startTime).toLocaleString()} –{" "}
-                {new Date(a.endTime).toLocaleTimeString()}
+                <span className="appointment-time">
+                  {new Date(a.startTime).toLocaleString()} –{" "}
+                  {new Date(a.endTime).toLocaleTimeString()}
+                </span>
               </div>
 
-              {/* Buttons below the appointment */}
               <div className="actions below">
-                <button className="edit-btn" onClick={() => onEdit && onEdit(a)}>
+                <button
+                  className="edit-btn"
+                  onClick={() => onEdit && onEdit(a)}
+                >
                   ✏️ Edit
                 </button>
                 <button

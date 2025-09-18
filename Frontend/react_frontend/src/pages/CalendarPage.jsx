@@ -233,15 +233,15 @@ const CalendarPage = () => {
       )}
 
       <div className="calendar-layout">
-        {/* ✅ Sidebar + overlay for mobile */}
+        {/* ✅ Overlay closes only when clicking outside sidebar */}
         {isMobile && showUpcoming && (
-          <div
-            className="overlay"
-            onClick={() => setShowUpcoming(false)}
-          ></div>
+          <div className="overlay" onClick={() => setShowUpcoming(false)}></div>
         )}
 
-        <div className={`upcoming-sidebar ${showUpcoming ? "open" : ""}`}>
+        <div
+          className={`upcoming-sidebar ${showUpcoming ? "open" : ""}`}
+          onClick={(e) => e.stopPropagation()} // 🔹 Prevent overlay close when interacting inside
+        >
           <UpcomingAppointments
             appointments={upcomingAppointments}
             onEdit={handleEditUpcoming}

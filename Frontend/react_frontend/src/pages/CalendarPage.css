@@ -37,11 +37,17 @@
 .upcoming-sidebar.open {
   width: 320px; /* ✅ Increased width for more space */
   padding: 15px;
+  overflow-y: auto; /* ✅ enable scrolling */
 }
 
 .dark-mode .upcoming-sidebar {
   background: #2a2a2a;
   border-color: #444;
+}
+
+/* Make sure sidebar is above overlay */
+.upcoming-sidebar {
+  z-index: 1000; /* ✅ Higher than overlay */
 }
 
 /* Main calendar content */
@@ -88,7 +94,7 @@
 
 /* Toggle upcoming sidebar button */
 .toggle-upcoming-btn {
-  background: #4caf50; /* Green */
+  background: #4caf50;
   color: rgb(255, 255, 255);
   border: none;
   padding: 6px 12px;
@@ -99,7 +105,7 @@
 }
 
 .toggle-upcoming-btn:hover {
-  background: #4caf50;
+  background: #43a047;
 }
 
 /* Center (title + navigation) */
@@ -145,7 +151,7 @@
 
 /* Add Appointment button */
 .add-appointment-btn {
-  background: #4caf50; /* Green */
+  background: #4caf50;
   color: white;
   padding: 8px 12px;
   border: none;
@@ -179,7 +185,6 @@
   font-weight: bold;
 }
 
-/* ✅ Changed to green cards */
 .upcoming-appointments ul {
   list-style: none;
   padding: 0;
@@ -189,9 +194,9 @@
 .upcoming-appointments li {
   margin-bottom: 12px;
   padding: 8px;
-  background: #4caf50; /* Green */
+  background: #4caf50;
   color: white;
-  border-left: 4px solid #2e7d32; /* Dark green accent */
+  border-left: 4px solid #2e7d32;
   border-radius: 6px;
   transition: transform 0.2s;
 }
@@ -230,9 +235,6 @@
 }
 
 /* =========================
-   CALENDAR GRID CELLS (NEW)
-========================= */
-/* =========================
    CALENDAR GRID CELLS
 ========================= */
 .calendar-grid td,
@@ -240,7 +242,7 @@
   border: 1px solid #ddd;
   padding: 10px;
   text-align: center;
-  border-radius: 12px; /* ✅ Rounded squares */
+  border-radius: 12px;
   background: #fff;
   transition: background 0.2s, transform 0.2s;
 }
@@ -248,7 +250,7 @@
 .calendar-grid td:hover,
 .calendar-grid .calendar-cell:hover {
   background: #f1f1f1;
-  transform: scale(1.02); /* ✅ slight zoom effect */
+  transform: scale(1.02);
 }
 
 .dark-mode .calendar-grid td,
@@ -261,10 +263,10 @@
    CALENDAR GRID APPOINTMENTS
 ========================= */
 .appointment {
- background: #2196f3 !important;  /* ✅ Force Blue */
+  background: #2196f3 !important;
   color: white !important;
   padding: 6px;
-  border-radius: 8px; /* rounded square */
+  border-radius: 8px;
   font-size: 13px;
   text-align: center;
   cursor: pointer;
@@ -272,14 +274,13 @@
 }
 
 .appointment:hover {
-  background: #1976d2 !important; /* ✅ Darker blue on hover */
+  background: #1976d2 !important;
 }
 
 .dark-mode .appointment {
- background: #1565c0 !important; /* ✅ Dark blue for dark mode */
+  background: #1565c0 !important;
   color: #e3f2fd !important;
 }
-
 
 /* =========================
    LOADING
@@ -299,18 +300,23 @@
   }
 
   .upcoming-sidebar {
-    position: absolute;
+    position: fixed;
     top: 0;
-    left: 0;
+    left: -260px;
+    width: 250px;
     height: 100%;
-    z-index: 200;
-    width: 0;
-    transition: width 0.4s ease-in-out;
+    background: white;
+    transition: left 0.3s ease-in-out;
+    z-index: 1000; /* ✅ above overlay */
   }
 
   .upcoming-sidebar.open {
-    width: 250px;
+    left: 0;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .calendar-main {
+    width: 100%;
   }
 
   .calendar-controls {
@@ -319,17 +325,21 @@
     gap: 8px;
   }
 }
+
+/* =========================
+   POPUP MESSAGE
+========================= */
 .popup-message {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgb(24, 182, 32); /* You can change this to green/red dynamically if needed */
+  background-color: rgb(24, 182, 32);
   color: white;
   padding: 16px 24px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
+  z-index: 2000;
   display: flex;
   align-items: center;
   font-size: 1rem;
@@ -347,7 +357,9 @@
   font-size: 1.2rem;
 }
 
-/* ✅ New hamburger button */
+/* =========================
+   HAMBURGER
+========================= */
 .hamburger-btn {
   background: none;
   border: none;
@@ -357,38 +369,9 @@
   margin-right: 12px;
 }
 
-/* ✅ Mobile drawer sidebar */
-@media (max-width: 768px) {
-  .calendar-layout {
-    flex-direction: column;
-  }
-
-  .upcoming-sidebar {
-    position: fixed;
-    top: 0;
-    left: -260px; /* hidden */
-    width: 250px;
-    height: 100%;
-    background: white;
-    transition: left 0.3s ease-in-out;
-    z-index: 200;
-  }
-
-  .upcoming-sidebar.open {
-    left: 0; /* slide in */
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-  }
-
-  .calendar-main {
-    width: 100%;
-  }
-
-  .calendar-controls {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-}
+/* =========================
+   OVERLAY
+========================= */
 .overlay {
   position: fixed;
   top: 0;
@@ -396,5 +379,5 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.3);
-  z-index: 500; /* make sure it's behind sidebar but above page */
+  z-index: 500; /* ✅ stays behind sidebar */
 }
