@@ -1,6 +1,7 @@
 .upcoming-appointments ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .appointment-card {
@@ -9,6 +10,8 @@
   border-radius: 10px;
   color: #fff; /* white text on colored background */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column; /* stack content vertically */
 }
 
 .appointment-info {
@@ -24,12 +27,15 @@
   font-size: 12px;
   font-weight: bold;
 }
+
+/* Buttons below each appointment, centered and side by side */
 .actions.below {
-  display: flex;
-  justify-content: center; /* Centers horizontally */
-  gap: 10px; /* Adds space between buttons */
-  margin-top: 10px; /* Optional, to add spacing */
+  display: flex;             /* arrange buttons in a row */
+  justify-content: center;   /* center horizontally */
+  gap: 10px;                 /* space between buttons */
+  margin-top: 10px;          /* spacing from appointment content */
 }
+
 .edit-btn,
 .delete-btn {
   border: none;
@@ -48,16 +54,17 @@
   background-color: white;
   color: black;
 }
+
 .upcoming-appointments {
   max-width: 100%;
   margin: 0 auto;
   padding: 12px;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto; /* allow natural growth */
 }
 
-/* 🔹 Sticky search bar at the top */
+/* Sticky search bar at the top */
 .search-container {
   position: sticky;
   top: 0;
@@ -74,19 +81,19 @@
   border-radius: 6px;
 }
 
-/* 🔹 Scrollable appointment list */
+/* Remove scroll restriction */
 .appointments-list {
   flex: 1;
-  max-height: 400px; /* adjust as needed */
-  overflow-y: auto;
   margin-top: 10px;
   padding-right: 6px;
+  max-height: none; /* allow natural height */
+  overflow-y: visible; /* remove scrolling */
 }
 
 /* Appointment card styles */
 .appointment-card {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column; /* stack content vertically */
   align-items: flex-start;
   margin-bottom: 12px;
   padding: 12px;
@@ -99,13 +106,15 @@
   flex: 1;
 }
 
+/* Desktop: buttons side by side */
 .actions.below {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row; /* side by side */
+  justify-content: center; /* centered horizontally */
+  gap: 10px;
+  margin-top: 10px;
 }
 
-/* 🔹 Mobile responsiveness */
+/* Mobile responsiveness: stack buttons vertically */
 @media (max-width: 768px) {
   .appointment-card {
     flex-direction: column;
@@ -113,8 +122,8 @@
   }
 
   .actions.below {
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: column; /* stacked vertically on mobile */
+    justify-content: center;
     width: 100%;
     margin-top: 8px;
   }
