@@ -18,6 +18,9 @@ const AddAppointmentModal = ({
   const [error, setError] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const TITLE_LIMIT = 30;
+  const DESCRIPTION_LIMIT = 50;
+
   const typeColors = {
     Meeting: "#4CAF50",
     Call: "#2196F3",
@@ -31,7 +34,8 @@ const AddAppointmentModal = ({
       setDate(new Date(selectedDate));
     }
   }, [selectedDate]);
-  // Inside AddAppointmentModal component
+
+  // ✅ Close on Escape
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -54,17 +58,18 @@ const AddAppointmentModal = ({
     }
   }, [appointmentToEdit]);
 
-  // ✅ Validation (only if user types)
+  // ✅ Validation
   useEffect(() => {
     const newErrors = {};
     if (title.trim()) {
-      if (title.length > 50) newErrors.title = "Title cannot exceed 50 characters.";
+      if (title.length > TITLE_LIMIT)
+        newErrors.title = `Title cannot exceed ${TITLE_LIMIT} characters.`;
       else if (!/^[a-zA-Z\s.,!?-]+$/.test(title))
         newErrors.title = "Title can only contain letters and punctuation.";
     }
     if (description.trim()) {
-      if (description.length > 100)
-        newErrors.description = "Description cannot exceed 100 characters.";
+      if (description.length > DESCRIPTION_LIMIT)
+        newErrors.description = `Description cannot exceed ${DESCRIPTION_LIMIT} characters.`;
       else if (!/^[a-zA-Z0-9\s.,!?-]+$/.test(description))
         newErrors.description = "Description can only contain letters, numbers, and punctuation.";
     }
@@ -138,7 +143,11 @@ const AddAppointmentModal = ({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Appointment title"
               required
+              maxLength={TITLE_LIMIT}   // ✅ Block extra chars
             />
+            <div className="char-counter">
+              {title.length}/{TITLE_LIMIT}
+            </div>
             {error.title && <span className="error-text">{error.title}</span>}
           </div>
 
@@ -151,7 +160,11 @@ const AddAppointmentModal = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add details about this appointment"
               rows="3"
+              maxLength={DESCRIPTION_LIMIT}  // ✅ Block extra chars
             />
+            <div className="char-counter">
+              {description.length}/{DESCRIPTION_LIMIT}
+            </div>
             {error.description && <span className="error-text">{error.description}</span>}
           </div>
 
