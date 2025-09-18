@@ -168,6 +168,9 @@ const CalendarPage = () => {
   const goToNextDay = () =>
     setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
 
+  // 🔹 New: Go to today
+  const goToToday = () => setSelectedDate(new Date());
+
   const handleEditUpcoming = (appointment) => {
     setSelectedAppointment(appointment);
     setSelectedTimeSlot(null);
@@ -204,7 +207,6 @@ const CalendarPage = () => {
 
       await updateAppointment(appointment.id, updatedAppointment);
 
-      // Update state locally so all views reflect change immediately
       const newAppointments = [...appointments];
       newAppointments[appointmentIndex] = updatedAppointment;
       setAppointments(newAppointments);
@@ -219,7 +221,6 @@ const CalendarPage = () => {
 
   return (
     <div className={`calendar-container ${darkMode ? "dark-mode" : ""}`}>
-      {/* Popup message */}
       {popupMessage && (
         <div className="popup-message">
           {popupMessage}
@@ -233,14 +234,13 @@ const CalendarPage = () => {
       )}
 
       <div className="calendar-layout">
-        {/* ✅ Overlay closes only when clicking outside sidebar */}
         {isMobile && showUpcoming && (
           <div className="overlay" onClick={() => setShowUpcoming(false)}></div>
         )}
 
         <div
           className={`upcoming-sidebar ${showUpcoming ? "open" : ""}`}
-          onClick={(e) => e.stopPropagation()} // 🔹 Prevent overlay close when interacting inside
+          onClick={(e) => e.stopPropagation()}
         >
           <UpcomingAppointments
             appointments={upcomingAppointments}
@@ -250,7 +250,6 @@ const CalendarPage = () => {
 
         <div className="calendar-main">
           <header className="calendar-header">
-            {/* ✅ Hamburger only on mobile */}
             {isMobile && (
               <button
                 className="hamburger-btn"
@@ -280,14 +279,15 @@ const CalendarPage = () => {
                 <button onClick={goToPreviousDay}>&lt;</button>
                 <span>{moment(selectedDate).format("YYYY-MM-DD")}</span>
                 <button onClick={goToNextDay}>&gt;</button>
+                {/* 🔹 Today button */}
+                <button onClick={goToToday} style={{ marginLeft: "10px" }}>
+                  Today
+                </button>
               </div>
             </div>
 
             <div className="right-section">
-              <ThemeToggle
-                darkMode={darkMode}
-                toggleDarkMode={toggleDarkMode}
-              />
+              <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
               <button
                 className="add-appointment-btn"
                 onClick={() => {
