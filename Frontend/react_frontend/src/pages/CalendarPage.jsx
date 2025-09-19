@@ -22,12 +22,17 @@ const CalendarPage = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const [calendarView, setCalendarView] = useState("day");
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [popupMessage, setPopupMessage] = useState(""); // popup message
+  const [popupMessage, setPopupMessage] = useState("");
 
-  // Auto-hide popup after 3 seconds
+  // Breakpoints
+  const isMobile = screenWidth < 600; // small phones
+  const isTablet = screenWidth >= 600 && screenWidth < 1024; // tablets
+  const isDesktop = screenWidth >= 1024; // desktops
+
+  // Auto-hide popup after 3s
   useEffect(() => {
     if (popupMessage) {
       const timer = setTimeout(() => setPopupMessage(""), 3000);
@@ -35,8 +40,9 @@ const CalendarPage = () => {
     }
   }, [popupMessage]);
 
+  // Listen for screen resize
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setScreenWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -168,7 +174,6 @@ const CalendarPage = () => {
   const goToNextDay = () =>
     setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
 
-  // 🔹 New: Go to today
   const goToToday = () => setSelectedDate(new Date());
 
   const handleEditUpcoming = (appointment) => {
@@ -183,7 +188,6 @@ const CalendarPage = () => {
       a.type?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Move appointment instantly (called by TimeSlotGrid on drop)
   const handleMoveAppointment = async (appointmentId, newDate, newTime) => {
     try {
       const appointmentIndex = appointments.findIndex(
@@ -233,7 +237,7 @@ const CalendarPage = () => {
         </div>
       )}
 
-      <div className="calendar-layout">
+      <div className={`calendar-layout ${isMobile ? "mobile" : isTablet ? "tablet" : "desktop"}`}>
         {isMobile && showUpcoming && (
           <div className="overlay" onClick={() => setShowUpcoming(false)}></div>
         )}
@@ -279,7 +283,6 @@ const CalendarPage = () => {
                 <button onClick={goToPreviousDay}>&lt;</button>
                 <span>{moment(selectedDate).format("YYYY-MM-DD")}</span>
                 <button onClick={goToNextDay}>&gt;</button>
-                {/* 🔹 Today button */}
                 <button onClick={goToToday} style={{ marginLeft: "10px" }}>
                   Today
                 </button>

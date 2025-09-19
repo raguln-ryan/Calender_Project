@@ -42,6 +42,7 @@ namespace backend.Services
             if (conflict && (dto.StartTime != appointment.StartTime || dto.EndTime != appointment.EndTime))
                 throw new InvalidOperationException("Appointment conflict detected!");
 
+            //This is in-memory change, not yet saved to DB.
             appointment.Title = dto.Title;
             appointment.Description = dto.Description;
             appointment.StartTime = dto.StartTime;

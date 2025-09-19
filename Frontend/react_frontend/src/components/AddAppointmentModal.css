@@ -18,6 +18,7 @@
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  color: #000; /* default text black in light mode */
 }
 
 .modal-header {
@@ -37,6 +38,7 @@
   border: none;
   font-size: 22px;
   cursor: pointer;
+  color: inherit; /* inherit based on mode */
 }
 
 .form-group {
@@ -56,6 +58,8 @@
   padding: 8px;
   border-radius: 5px;
   border: 1px solid #ccc;
+  background: #fff;
+  color: #000;
 }
 
 .form-group textarea {
@@ -127,4 +131,59 @@
 
 .create-btn:disabled {
   background: #7aaefc;
+}
+
+/* ========================= */
+/* 🔹 DARK MODE SUPPORT */
+/* ========================= */
+.dark-mode .modal-content {
+  background: #1e1e1e;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+}
+
+.dark-mode .form-group label {
+  color: #ccc;
+}
+
+.dark-mode .form-group input,
+.dark-mode .form-group textarea,
+.dark-mode .form-group select {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+.dark-mode .form-group input:focus,
+.dark-mode .form-group textarea:focus,
+.dark-mode .form-group select:focus {
+  border-color: #90caf9;
+  box-shadow: 0 0 6px rgba(144, 202, 249, 0.4);
+}
+
+.dark-mode .calendar-btn {
+  color: #bbb;
+}
+
+.dark-mode .calendar-btn:hover {
+  color: #fff;
+}
+
+.dark-mode .cancel-btn {
+  background: #555;
+  color: #fff;
+}
+
+.dark-mode .create-btn {
+  background: #2196f3;
+  color: #fff;
+}
+
+.dark-mode .create-btn:disabled {
+  background: #5a8fd8;
+}
+
+.dark-mode .error-message {
+  background: #3a1c1c;
+  color: #ff8080;
 }

@@ -5,6 +5,7 @@ namespace backend.Data
 {
     public class AppDbContext : DbContext
     {
+        //carries the database configuration (like connection string, provider: SQL Server, SQLite, etc.).
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {

@@ -73,21 +73,63 @@
   padding: 6px 0;
 }
 
-.search-input {
-  width: 100%;
-  padding: 8px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+/* Container for date picker + search */
+.search-container {
+  display: flex;
+  flex-direction: column; /* 🔹 Stack vertically */
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
-/* Remove scroll restriction */
-.appointments-list {
-  flex: 1;
-  margin-top: 10px;
-  padding-right: 6px;
-  max-height: none; /* allow natural height */
-  overflow-y: visible; /* remove scrolling */
+/* 🔹 Shared styles for both inputs */
+.search-input,
+.date-picker-input input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 50px; /* circular rectangle shape */
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Focus effect */
+.search-input:focus,
+.date-picker-input input:focus {
+  border-color: #3f51b5;
+  box-shadow: 0 0 8px rgba(63, 81, 181, 0.3);
+}
+
+/* Date picker container (with clear button) */
+.date-picker-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Clear button inside date picker */
+.clear-date-btn {
+  position: absolute;
+  right: 12px;
+  background: black;
+  border: none;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.clear-date-btn:hover {
+  background: black;
 }
 
 /* Appointment card styles */
@@ -128,60 +170,31 @@
     margin-top: 8px;
   }
 }
-/* Container for date picker + search */
-.search-container {
-  display: flex;
-  flex-direction: column; /* 🔹 Stack vertically */
-  gap: 10px;
-  margin-bottom: 15px;
+
+/* 🔹 DARK MODE SUPPORT */
+.dark-mode .search-container {
+  background: #121212;
 }
 
-/* 🔹 Shared styles for both inputs */
-.search-input,
-.date-picker-input input {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #ccc;
-  border-radius: 50px; /* circular rectangle shape */
-  font-size: 14px;
-  outline: none;
-  transition: all 0.2s ease-in-out;
+.dark-mode .search-input,
+.dark-mode .date-picker-input input {
+  background: #1e1e1e;
+  color: #fff;
+  border: 1px solid #555;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .search-input:focus,
+.dark-mode .date-picker-input input:focus {
+  border-color: #90caf9;
+  box-shadow: 0 0 8px rgba(144, 202, 249, 0.4);
+}
+
+.dark-mode .clear-date-btn {
   background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  color: #000;
 }
 
-/* Focus effect */
-.search-input:focus,
-.date-picker-input input:focus {
-  border-color: #3f51b5;
-  box-shadow: 0 0 8px rgba(63, 81, 181, 0.3);
-}
-
-/* Date picker container (with clear button) */
-.date-picker-input {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-/* Clear button inside date picker */
-.clear-date-btn {
-  position: absolute;
-  right: 12px;
-  background: black;
-  border: none;
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: background 0.2s;
-}
-
-.clear-date-btn:hover {
-  background:black;
+.dark-mode .clear-date-btn:hover {
+  background: #ddd;
 }
