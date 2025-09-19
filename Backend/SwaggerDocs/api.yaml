@@ -99,12 +99,12 @@ components:
           type: integer
           format: int32
         title:
-          maxLength: 100
+          maxLength: 30
           minLength: 0
           type: string
           nullable: true
         description:
-          maxLength: 500
+          maxLength: 50
           minLength: 0
           type: string
           nullable: true
