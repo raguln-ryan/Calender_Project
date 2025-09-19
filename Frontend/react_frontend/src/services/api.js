@@ -3,7 +3,7 @@ import axios from "axios";
 // Create Axios instance
 const api = axios.create({
   baseURL: "http://localhost:5000/api", // Must match backend
-  headers: { "Content-Type": "application/json" },
+  headers: { "Content-Type": "application/json" }, //sending/receiving json format
 });
 
 // Helper for safer requests
@@ -37,7 +37,7 @@ export const deleteAppointment = async (id) =>
   handleRequest(() => api.delete(`/appointments/${id}`));
 
 // ✅ New: Get upcoming appointments for next N days
-export const getUpcomingAppointments = async (days = 3) => {
+export const getUpcomingAppointments = async (days ) => {
   const today = new Date().toISOString().split("T")[0];
   const endDate = new Date();
   endDate.setDate(endDate.getDate() + days);

@@ -1,5 +1,5 @@
 import React from 'react';
-import './CalendarViewSelector.css';
+import '../styles/CalendarViewSelector.css';
 
 const CalendarViewSelector = ({ currentView, onViewChange }) => {
   return (

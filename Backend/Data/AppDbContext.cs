@@ -16,7 +16,7 @@ namespace backend.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+             //how the appointment entity map to the db table
             modelBuilder.Entity<Appointment>(entity =>
             {
                 entity.HasKey(a => a.Id);

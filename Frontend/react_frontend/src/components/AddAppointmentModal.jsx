@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createAppointment, updateAppointment } from "../services/api";
-import "./AddAppointmentModal.css";
+import "../styles/AddAppointmentModal.css";
 
 const AddAppointmentModal = ({
   onClose,
@@ -9,7 +9,7 @@ const AddAppointmentModal = ({
   appointmentToEdit,
   setPopupMessage
 }) => {
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(""); //initializes the state with an empty string.
   const [description, setDescription] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");

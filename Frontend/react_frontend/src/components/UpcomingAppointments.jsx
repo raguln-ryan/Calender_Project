@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getUpcomingAppointments, deleteAppointment } from "../services/api";
-import "./UpcomingAppointments.css";
+import "../styles/UpcomingAppointments.css";
 
 const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
   const [appointments, setAppointments] = useState([]);

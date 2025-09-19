@@ -1,5 +1,5 @@
 import React from "react";
-import "./TimeSlotGrid.css";
+import "../styles/TimeSlotGrid.css";
 
 const TimeSlotGrid = ({ appointments, selectedDate, onSlotClick, view, onMoveAppointment }) => {
   // Normalize appointments so that each has "date": "YYYY-MM-DD" and "time": "HH:mm"
@@ -180,7 +180,7 @@ const renderMonthView = (appointments, selectedDate, onSlotClick, onMoveAppointm
   const lastDay = new Date(year, month + 1, 0);
   const firstDayOfWeek = firstDay.getDay(); // 0 = Sunday
 
-  const totalDays = 42; // 6 rows * 7 days
+  const totalDays = 35; // 6 rows * 7 days
   const calendarDays = [];
 
   // Days from previous month
