@@ -1,189 +1,244 @@
+/* ============================
+   Modal Overlay
+   ============================ */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.5);
+  z-index: 3000;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  overflow-y: auto;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
+/* ============================
+   Modal Content
+   ============================ */
 .modal-content {
   background: #fff;
-  width: 450px;
-  max-width: 95%;
+  width: 100%;
+  max-width: 500px;
   border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  color: #000; /* default text black in light mode */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: relative;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  max-height: 95vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Modal Header */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .modal-header h2 {
+  font-size: 1.25rem;
   margin: 0;
-  font-size: 20px;
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 22px;
+  font-size: 1.5rem;
   cursor: pointer;
-  color: inherit; /* inherit based on mode */
 }
 
+/* Form Groups */
 .form-group {
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
-  margin-bottom: 5px;
-  font-weight: 500;
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+  font-size: 0.95rem;
 }
 
 .form-group input,
-.form-group textarea,
-.form-group select {
-  padding: 8px;
-  border-radius: 5px;
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  border-radius: 6px;
   border: 1px solid #ccc;
-  background: #fff;
-  color: #000;
+  outline: none;
+  box-sizing: border-box;
 }
 
 .form-group textarea {
-  resize: vertical;
+  resize: none;
 }
 
+/* Character Counter */
+.char-counter {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 2px;
+  text-align: right;
+}
+
+/* Error Messages */
 .error-text {
+  font-size: 0.75rem;
   color: red;
-  font-size: 12px;
-  margin-top: 5px;
+  margin-top: 2px;
 }
 
-.error-message {
-  background: #ffe6e6;
-  color: #cc0000;
-  padding: 8px;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  font-size: 14px;
-}
-
-.date-input-wrapper {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.date-input-wrapper input[type="date"] {
-  flex: 1;
-  padding-right: 40px; /* space for the calendar button */
-}
-
-.calendar-btn {
-  position: absolute;
-  right: 8px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  color: #555;
-}
-
-.calendar-btn:hover {
-  color: #000;
-}
-
+/* Form Actions */
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 1rem;
 }
 
-.cancel-btn,
-.create-btn {
+.create-btn,
+.cancel-btn {
   padding: 8px 16px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
+  font-weight: bold;
   cursor: pointer;
+  font-size: 0.95rem;
 }
 
 .cancel-btn {
   background: #ccc;
-}
-
-.create-btn {
-  background: #007bff;
   color: white;
 }
 
-.create-btn:disabled {
-  background: #7aaefc;
+.create-btn {
+  color: #fff;
 }
 
-/* ========================= */
-/* 🔹 DARK MODE SUPPORT */
-/* ========================= */
+/* Date picker group */
+.date-picker-group input {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+
+/* ============================
+   Responsive Styles
+   ============================ */
+@media (max-width: 1024px) {
+  /* iPad portrait and landscape */
+  .modal-content {
+    max-width: 90%;
+    padding: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .create-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Tablets and large phones */
+  .modal-content {
+    max-width: 95%;
+    padding: 0.9rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.15rem;
+  }
+
+  .close-btn {
+    font-size: 1.25rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+  }
+
+  .char-counter {
+    font-size: 0.7rem;
+  }
+
+  .create-btn,
+  .cancel-btn {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Small phones */
+  .modal-content {
+    max-width: 100%;
+    padding: 0.7rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1rem;
+  }
+
+  .close-btn {
+    font-size: 1.1rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 0.85rem;
+    padding: 5px 8px;
+  }
+
+  .char-counter {
+    font-size: 0.65rem;
+  }
+
+  .create-btn,
+  .cancel-btn {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+  }
+}
+
+/* ============================
+   Dark Mode
+   ============================ */
 .dark-mode .modal-content {
   background: #1e1e1e;
   color: #fff;
-  box-shadow: 0 4px 12px rgba(255,255,255,0.1);
 }
 
-.dark-mode .form-group label {
-  color: #ccc;
-}
-
-.dark-mode .form-group input,
-.dark-mode .form-group textarea,
-.dark-mode .form-group select {
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
   background: #2a2a2a;
   color: #fff;
   border: 1px solid #555;
 }
 
-.dark-mode .form-group input:focus,
-.dark-mode .form-group textarea:focus,
-.dark-mode .form-group select:focus {
-  border-color: #90caf9;
-  box-shadow: 0 0 6px rgba(144, 202, 249, 0.4);
-}
-
-.dark-mode .calendar-btn {
-  color: #bbb;
-}
-
-.dark-mode .calendar-btn:hover {
+.dark-mode .create-btn {
   color: #fff;
 }
 
 .dark-mode .cancel-btn {
-  background: #555;
-  color: #fff;
-}
-
-.dark-mode .create-btn {
-  background: #2196f3;
-  color: #fff;
-}
-
-.dark-mode .create-btn:disabled {
-  background: #5a8fd8;
-}
-
-.dark-mode .error-message {
-  background: #3a1c1c;
-  color: #ff8080;
+  color: #000;
 }

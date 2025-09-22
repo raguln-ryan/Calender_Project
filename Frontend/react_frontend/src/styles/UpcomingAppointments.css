@@ -1,3 +1,62 @@
+/* ==============================
+   Upcoming Appointments Sidebar
+   ============================== */
+
+/* Sidebar */
+.upcoming-appointments {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 100%; /* Mobile default */
+  max-width: 400px; /* Max width for iPad/large devices */
+  height: 100%;
+  background: #fff;
+  color: #000;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+  overflow: hidden; /* Prevent page scroll when sidebar open */
+  transition: left 0.3s ease-in-out;
+  z-index: 2000;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.upcoming-appointments.open {
+  left: 0;
+}
+
+/* Overlay */
+.overlay {
+  display: none;
+}
+
+.overlay.show {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1900;
+}
+
+/* Hamburger Button */
+.hamburger-btn {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 2100;
+  font-size: 24px;
+  background: #3f51b5;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* Appointment List */
 .upcoming-appointments ul {
   list-style: none;
   padding: 0;
@@ -5,17 +64,20 @@
 }
 
 .appointment-card {
-  margin: 10px 0;
-  padding: 12px;
+  margin: 12px 0;
+  padding: 14px;
   border-radius: 10px;
-  color: #fff; /* white text on colored background */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  background: #3f51b5;
+  color: #fff;
   display: flex;
-  flex-direction: column; /* stack content vertically */
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .appointment-info {
   margin-bottom: 10px;
+  word-wrap: break-word;
 }
 
 .type-badge {
@@ -28,12 +90,12 @@
   font-weight: bold;
 }
 
-/* Buttons below each appointment, centered and side by side */
 .actions.below {
-  display: flex;             /* arrange buttons in a row */
-  justify-content: center;   /* center horizontally */
-  gap: 10px;                 /* space between buttons */
-  margin-top: 10px;          /* spacing from appointment content */
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .edit-btn,
@@ -43,135 +105,158 @@
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  background: #fff;
+  color: #000;
+  min-width: 70px;
+  text-align: center;
 }
 
-.edit-btn {
-  background-color: white;
-  color: black;
-}
-
-.delete-btn {
-  background-color: white;
-  color: black;
-}
-
-.upcoming-appointments {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  height: auto; /* allow natural growth */
-}
-
-/* Sticky search bar at the top */
+/* Search + Filters */
 .search-container {
   position: sticky;
   top: 0;
   background: #fff;
   z-index: 10;
-  padding: 6px 0;
-}
-
-/* Container for date picker + search */
-.search-container {
+  padding: 8px 0;
   display: flex;
-  flex-direction: column; /* 🔹 Stack vertically */
+  flex-direction: column;
   gap: 10px;
-  margin-bottom: 15px;
 }
 
-/* 🔹 Shared styles for both inputs */
 .search-input,
 .date-picker-input input {
   width: 100%;
   padding: 10px 15px;
+  border-radius: 50px;
   border: 1px solid #ccc;
-  border-radius: 50px; /* circular rectangle shape */
   font-size: 14px;
   outline: none;
-  transition: all 0.2s ease-in-out;
   background: #fff;
   color: #000;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-/* Focus effect */
-.search-input:focus,
-.date-picker-input input:focus {
-  border-color: #3f51b5;
-  box-shadow: 0 0 8px rgba(63, 81, 181, 0.3);
-}
-
-/* Date picker container (with clear button) */
 .date-picker-input {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-/* Clear button inside date picker */
 .clear-date-btn {
   position: absolute;
   right: 12px;
-  background: black;
-  border: none;
-  color: white;
-  border-radius: 50%;
   width: 24px;
   height: 24px;
-  cursor: pointer;
-  font-size: 14px;
+  border-radius: 50%;
+  border: none;
+  background: #000;
+  color: #fff;
   display: flex;
-  justify-content: center;
   align-items: center;
-  transition: background 0.2s;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
 }
 
 .clear-date-btn:hover {
-  background: black;
+  background: #333;
 }
 
-/* Appointment card styles */
-.appointment-card {
-  display: flex;
-  flex-direction: column; /* stack content vertically */
-  align-items: flex-start;
-  margin-bottom: 12px;
-  padding: 12px;
-  border-radius: 6px;
-  color: #fff;
-  font-size: 0.95rem;
+/* Scrollable appointment list inside sidebar */
+.appointments-scroll {
+  /* Use dynamic viewport height minus top padding & search height */
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
-.appointment-info {
-  flex: 1;
+.appointments-scroll::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* Desktop: buttons side by side */
-.actions.below {
-  flex-direction: row; /* side by side */
-  justify-content: center; /* centered horizontally */
-  gap: 10px;
-  margin-top: 10px;
+.appointments-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.3);
+  border-radius: 3px;
 }
 
-/* Mobile responsiveness: stack buttons vertically */
-@media (max-width: 768px) {
+/* ==============================
+   Responsive for Tablets & Mobiles
+   ============================== */
+@media (max-width: 767px) {
+  /* Mobile */
+  .hamburger-btn {
+    display: block;
+  }
+
+  .upcoming-appointments {
+    width: 100%;
+  }
+
+  .section-title {
+    display: none;
+  }
+
   .appointment-card {
     flex-direction: column;
     align-items: flex-start;
   }
 
   .actions.below {
-    flex-direction: column; /* stacked vertically on mobile */
-    justify-content: center;
+    flex-direction: column;
     width: 100%;
-    margin-top: 8px;
   }
 }
 
-/* 🔹 DARK MODE SUPPORT */
+/* iPad Portrait */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .hamburger-btn {
+    display: block;
+    top: 20px;
+    left: 20px;
+  }
+
+  .upcoming-appointments {
+    width: 80%;
+  }
+}
+
+/* iPad Landscape */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .hamburger-btn {
+    display: block;
+    top: 20px;
+    left: 20px;
+  }
+
+  .upcoming-appointments {
+    width: 65%;
+  }
+}
+
+/* Desktop: always show sidebar */
+@media (min-width: 1281px) {
+  .upcoming-appointments {
+    position: relative;
+    left: 0;
+    width: 350px;
+    height: auto;
+    box-shadow: none;
+  }
+
+  .hamburger-btn {
+    display: none;
+  }
+
+  .section-title {
+    display: block;
+  }
+}
+
+/* Dark Mode */
+.dark-mode .upcoming-appointments {
+  background: #121212;
+  color: #fff;
+}
+
 .dark-mode .search-container {
   background: #121212;
 }
@@ -181,13 +266,6 @@
   background: #1e1e1e;
   color: #fff;
   border: 1px solid #555;
-  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
-}
-
-.dark-mode .search-input:focus,
-.dark-mode .date-picker-input input:focus {
-  border-color: #90caf9;
-  box-shadow: 0 0 8px rgba(144, 202, 249, 0.4);
 }
 
 .dark-mode .clear-date-btn {
@@ -198,61 +276,7 @@
 .dark-mode .clear-date-btn:hover {
   background: #ddd;
 }
-/* Desktop (default: always visible) */
-.upcoming-appointments {
-  width: 320px;
-  background: #fff;
-  padding: 1rem;
-  height: 100%;
-  overflow-y: auto;
-}
 
-.hamburger-btn {
-  display: none;
-}
-.overlay {
-  display: none;
-}
-
-/* Mobile only */
-@media (max-width: 768px) {
-  .hamburger-btn {
-    display: block;
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    font-size: 1.8rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    z-index: 2001;
-  }
-
-  .overlay.show {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 2000;
-  }
-
-  .upcoming-appointments {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    height: 100%;
-    width: 80%;
-    max-width: 350px;
-    background: #fff;
-    z-index: 2002;
-    transition: right 0.3s ease-in-out;
-    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
-  }
-
-  .upcoming-appointments.open {
-    right: 0;
-  }
+.dark-mode .overlay.show {
+  background: rgba(255, 255, 255, 0.15);
 }

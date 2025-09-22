@@ -8,12 +8,13 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-  const [isOpen, setIsOpen] = useState(false); // Mobile drawer state
+  const [isOpen, setIsOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await getUpcomingAppointments(30); // fetch next 30 days
+      const data = await getUpcomingAppointments(30);
       const upcoming = data?.filter((a) => !a.completed) || [];
       setAppointments(upcoming);
       setLoading(false);
@@ -27,6 +28,13 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
   useEffect(() => {
     fetchAppointments();
   }, [refreshTrigger]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
@@ -44,7 +52,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     }
   };
 
-  // Filter appointments (search + optional date)
+  // Filter appointments
   const filteredAppointments = appointments.filter((a) => {
     const title = a?.title?.toLowerCase() || "";
     const type = a?.type?.toLowerCase() || "";
@@ -57,29 +65,34 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     const appointmentDate = new Date(a.startTime);
     const selected = new Date(selectedDate);
 
-    const matchesDate =
+    return (
+      matchesSearch &&
       appointmentDate.getFullYear() === selected.getFullYear() &&
       appointmentDate.getMonth() === selected.getMonth() &&
-      appointmentDate.getDate() === selected.getDate();
-
-    return matchesSearch && matchesDate;
+      appointmentDate.getDate() === selected.getDate()
+    );
   });
 
   return (
     <>
-      {/* Hamburger (mobile only) */}
-      <button className="hamburger-btn" onClick={() => setIsOpen(true)}>
-        ☰
-      </button>
+      {/* Hamburger button: always only this for mobile & iPad */}
+      {!isOpen && (
+        <button
+          className="hamburger-btn"
+          onClick={() => setIsOpen(true)}
+        >
+          ☰
+        </button>
+      )}
 
-      {/* Overlay (mobile only, click to close) */}
+      {/* Overlay */}
       {isOpen && <div className="overlay show" onClick={() => setIsOpen(false)} />}
 
-      {/* Main drawer / sidebar */}
+      {/* Sidebar Drawer */}
       <div className={`upcoming-appointments ${isOpen ? "open" : ""}`}>
         <h3 className="section-title">📅 Upcoming Appointments</h3>
 
-        {/* Date picker + search bar */}
+        {/* Search + Date Picker */}
         <div className="search-container">
           <div className="date-picker-input">
             <input
@@ -106,14 +119,15 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
           />
         </div>
 
-        {loading ? (
-          <p>Loading...</p>
-        ) : error ? (
-          <p className="error-text">{error}</p>
-        ) : filteredAppointments.length === 0 ? (
-          <p>No appointments found.</p>
-        ) : (
-          <div className="appointments-scroll">
+        {/* Appointment List with scroll */}
+        <div className="appointments-scroll">
+          {loading ? (
+            <p>Loading...</p>
+          ) : error ? (
+            <p className="error-text">{error}</p>
+          ) : filteredAppointments.length === 0 ? (
+            <p>No appointments found.</p>
+          ) : (
             <ul className="appointments-list">
               {filteredAppointments.map((a) => (
                 <li
@@ -152,8 +166,8 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
                 </li>
               ))}
             </ul>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </>
   );
