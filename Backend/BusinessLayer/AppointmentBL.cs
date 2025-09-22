@@ -1,71 +1,57 @@
-using backend.Models;
-using backend.Repositories;
+using Backend.DataAccessLayer;
+using Backend.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace backend.Services
+namespace Backend.BusinessLayer
 {
-    public class AppointmentService : IAppointmentService
+    public class AppointmentBL : IAppointmentBL
     {
-        private readonly IAppointmentRepository _repository;
+        private readonly IAppointmentDAL _appointmentDAL;
 
-        public AppointmentService(IAppointmentRepository repository)
+        public AppointmentBL(IAppointmentDAL appointmentDAL)
         {
-            _repository = repository;
+            _appointmentDAL = appointmentDAL;
         }
 
-        public async Task<List<Appointment>> GetAppointmentsByDateAsync(DateTime date)
+        public async Task<IEnumerable<Appointment>> GetAppointmentsByUserAsync(int userId)
         {
-            return await _repository.GetAppointmentsByDateAsync(date);
+            return await _appointmentDAL.GetAppointmentsByUserAsync(userId);
         }
 
-        public async Task<Appointment> CreateAppointmentAsync(Appointment dto)
+        public async Task<Appointment> GetAppointmentByIdAsync(int id, int userId)
         {
-            var conflict = await _repository.HasConflictAsync(dto.StartTime, dto.EndTime);
-            if (conflict)
-            {
-                throw new InvalidOperationException("Appointment conflict detected!");
-            }
-
-            await _repository.AddAsync(dto);
-            await _repository.SaveChangesAsync();
-
-            return dto;
-        }
-
-        public async Task<Appointment> UpdateAppointmentAsync(int id, Appointment dto)
-        {
-            var appointment = await _repository.GetByIdAsync(id);
-            if (appointment == null)
-                throw new KeyNotFoundException("Appointment not found.");
-
-            // Check conflicts excluding itself
-            var conflict = await _repository.HasConflictAsync(dto.StartTime, dto.EndTime);
-            if (conflict && (dto.StartTime != appointment.StartTime || dto.EndTime != appointment.EndTime))
-                throw new InvalidOperationException("Appointment conflict detected!");
-
-            //This is in-memory change, not yet saved to DB.
-            appointment.Title = dto.Title;
-            appointment.Description = dto.Description;
-            appointment.StartTime = dto.StartTime;
-            appointment.EndTime = dto.EndTime;
-
-            await _repository.SaveChangesAsync();
+            var appointment = await _appointmentDAL.GetAppointmentByIdAsync(id);
+            if (appointment == null || appointment.UserId != userId)
+                return null;
             return appointment;
         }
 
-        public async Task<bool> DeleteAppointmentAsync(int id)
+        public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
         {
-            var appointment = await _repository.GetByIdAsync(id);
-            if (appointment == null) return false;
-
-            await _repository.DeleteAsync(appointment);
-            await _repository.SaveChangesAsync();
-
-            return true;
+            await _appointmentDAL.AddAppointmentAsync(appointment);
+            return appointment;
         }
 
-        public async Task<List<Appointment>> GetUpcomingAppointmentsAsync(DateTime start, DateTime end)
+        public async Task UpdateAppointmentAsync(Appointment appointment, int userId)
         {
-            return await _repository.GetAppointmentsInRangeAsync(start, end);
+            var existing = await _appointmentDAL.GetAppointmentByIdAsync(appointment.Id);
+            if (existing == null || existing.UserId != userId)
+                throw new System.Exception("Unauthorized");
+
+            existing.Title = appointment.Title;
+            existing.Date = appointment.Date;
+
+            await _appointmentDAL.UpdateAppointmentAsync(existing);
+        }
+
+        public async Task DeleteAppointmentAsync(int id, int userId)
+        {
+            var appointment = await _appointmentDAL.GetAppointmentByIdAsync(id);
+            if (appointment == null || appointment.UserId != userId)
+                throw new System.Exception("Unauthorized");
+
+            await _appointmentDAL.DeleteAppointmentAsync(id);
         }
     }
 }

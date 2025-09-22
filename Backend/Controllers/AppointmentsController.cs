@@ -1,78 +1,61 @@
+using Backend.BusinessLayer;
+using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Models;
-using backend.Services;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace backend.Controllers
+namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class AppointmentsController : ControllerBase
     {
-        private readonly IAppointmentService _service;
+        private readonly IAppointmentBL _appointmentBL;
 
-        public AppointmentsController(IAppointmentService service)
+        public AppointmentsController(IAppointmentBL appointmentBL)
         {
-            _service = service;
+            _appointmentBL = appointmentBL;
         }
 
-        // GET /api/appointments?date=2025-09-15
-        [HttpGet]
-        public async Task<IActionResult> GetAppointments([FromQuery] DateTime date)
+        private int GetUserId()
         {
-            var appointments = await _service.GetAppointmentsByDateAsync(date);
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim == null)
+                throw new UnauthorizedAccessException("User ID claim not found in token.");
+            return int.Parse(claim.Value);
+        }
+
+
+        [HttpGet("upcoming")]
+        public async Task<IActionResult> GetUpcomingAppointments()
+        {
+            var appointments = await _appointmentBL.GetAppointmentsByUserAsync(GetUserId());
             return Ok(appointments);
         }
 
-        // POST /api/appointments
         [HttpPost]
-        public async Task<IActionResult> CreateAppointment([FromBody] Appointment dto)
+        public async Task<IActionResult> CreateAppointment(Appointment appointment)
         {
-            try
-            {
-                var created = await _service.CreateAppointmentAsync(dto);
-                return CreatedAtAction(nameof(GetAppointments), new { date = dto.StartTime.Date }, created);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            appointment.UserId = GetUserId();
+            var created = await _appointmentBL.CreateAppointmentAsync(appointment);
+            return Ok(created);
         }
 
-        // PUT /api/appointments/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAppointment(int id, [FromBody] Appointment dto)
+        public async Task<IActionResult> UpdateAppointment(int id, Appointment appointment)
         {
-            try
-            {
-                var updated = await _service.UpdateAppointmentAsync(id, dto);
-                return Ok(updated);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(new { message = "Appointment not found." });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-        }
-
-        // DELETE /api/appointments/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAppointment(int id)
-        {
-            var success = await _service.DeleteAppointmentAsync(id);
-            if (!success) return NotFound();
-
+            appointment.Id = id;
+            await _appointmentBL.UpdateAppointmentAsync(appointment, GetUserId());
             return NoContent();
         }
 
-        // GET /api/appointments/upcoming?start=2025-09-16&end=2025-09-19
-        [HttpGet("upcoming")]
-        public async Task<IActionResult> GetUpcomingAppointments([FromQuery] DateTime start, [FromQuery] DateTime end)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAppointment(int id)
         {
-            var appointments = await _service.GetUpcomingAppointmentsAsync(start, end);
-            return Ok(appointments);
+            await _appointmentBL.DeleteAppointmentAsync(id, GetUserId());
+            return NoContent();
         }
     }
 }

@@ -1,13 +1,15 @@
-using backend.Models;
+using Backend.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace backend.Services
+namespace Backend.BusinessLayer
 {
-    public interface IAppointmentService
+    public interface IAppointmentBL
     {
-        Task<List<Appointment>> GetAppointmentsByDateAsync(DateTime date);
-        Task<Appointment> CreateAppointmentAsync(Appointment dto);
-        Task<Appointment> UpdateAppointmentAsync(int id, Appointment dto);  // ✅ new
-        Task<bool> DeleteAppointmentAsync(int id);
-        Task<List<Appointment>> GetUpcomingAppointmentsAsync(DateTime start, DateTime end); // ✅ new
+        Task<IEnumerable<Appointment>> GetAppointmentsByUserAsync(int userId);
+        Task<Appointment> GetAppointmentByIdAsync(int id, int userId);
+        Task<Appointment> CreateAppointmentAsync(Appointment appointment);
+        Task UpdateAppointmentAsync(Appointment appointment, int userId);
+        Task DeleteAppointmentAsync(int id, int userId);
     }
 }

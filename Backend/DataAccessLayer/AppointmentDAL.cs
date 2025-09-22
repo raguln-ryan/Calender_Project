@@ -1,59 +1,53 @@
-using backend.Data;
-using backend.Models;
+using Backend.Data;
+using Backend.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace backend.Repositories
+namespace Backend.DataAccessLayer
 {
-    public class AppointmentRepository : IAppointmentRepository
+    public class AppointmentDAL : IAppointmentDAL
     {
         private readonly AppDbContext _context;
 
-        public AppointmentRepository(AppDbContext context)
+        public AppointmentDAL(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<List<Appointment>> GetAppointmentsByDateAsync(DateTime date)
+        public async Task<IEnumerable<Appointment>> GetAppointmentsByUserAsync(int userId)
         {
             return await _context.Appointments
-                .Where(a => a.StartTime.Date == date.Date)
-                .OrderBy(a => a.StartTime)
+                .Where(a => a.UserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<List<Appointment>> GetAppointmentsInRangeAsync(DateTime start, DateTime end)
-        {
-            return await _context.Appointments
-                .Where(a => a.StartTime.Date >= start.Date && a.StartTime.Date <= end.Date)
-                .OrderBy(a => a.StartTime)
-                .ToListAsync();
-        }
-
-        public async Task<Appointment?> GetByIdAsync(int id)
+        public async Task<Appointment> GetAppointmentByIdAsync(int id)
         {
             return await _context.Appointments.FindAsync(id);
         }
 
-        public async Task<bool> HasConflictAsync(DateTime start, DateTime end)
+        public async Task AddAppointmentAsync(Appointment appointment)
         {
-            return await _context.Appointments.AnyAsync(a =>
-                start < a.EndTime && end > a.StartTime);
-        }
-
-        public async Task AddAsync(Appointment appointment)
-        {
-            await _context.Appointments.AddAsync(appointment);
-        }
-
-        public Task DeleteAsync(Appointment appointment)
-        {
-            _context.Appointments.Remove(appointment);
-            return Task.CompletedTask;
-        }
-
-        public async Task SaveChangesAsync()
-        {
+            _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAppointmentAsync(Appointment appointment)
+        {
+            _context.Appointments.Update(appointment);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAppointmentAsync(int id)
+        {
+            var appointment = await _context.Appointments.FindAsync(id);
+            if (appointment != null)
+            {
+                _context.Appointments.Remove(appointment);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

@@ -1,100 +1,86 @@
-﻿using backend.Data;
-using backend.Repositories;
-using backend.Services;
+﻿using Backend.BusinessLayer;
+using Backend.Data;
+using Backend.DataAccessLayer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using System.IO;
-using Microsoft.OpenApi.Writers;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-//It will scan your controllers and endpoints and automatically generate API documentation.
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Appointments API",
-        Version = "v1",
-        Description = "API for managing appointments"
-    });
-});
-
-// Register DbContext
+// -----------------------
+// Add DbContext (MySQL)
+// -----------------------
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
-    ));
+        new MySqlServerVersion(new Version(8, 0, 33))
+    )
+);
 
-// Register services & repositories
-builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
-builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+// -----------------------
+// Dependency Injection: BL & DAL
+// -----------------------
+builder.Services.AddScoped<IUserDAL, UserDAL>();
+builder.Services.AddScoped<IUserBL, UserBL>();
+builder.Services.AddScoped<IAppointmentDAL, AppointmentDAL>();
+builder.Services.AddScoped<IAppointmentBL, AppointmentBL>();
 
-// Add CORS policy for React frontend
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReactApp", builder =>
+// -----------------------
+// JWT Authentication
+// -----------------------
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["Secret"];
+
+if (string.IsNullOrEmpty(secretKey))
+    throw new InvalidOperationException("JWT Secret is missing in appsettings.json");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        builder.WithOrigins("http://localhost:3000")
-               .AllowAnyHeader()
-               .AllowAnyMethod();
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+        };
     });
-});
 
+// -----------------------
+// Controllers & Swagger
+// -----------------------
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// -----------------------
+// Build & Configure App
+// -----------------------
 var app = builder.Build();
 
-// Enable Swagger JSON
-app.UseSwagger(c =>
-{
-    c.RouteTemplate = "swagger/{documentName}/swagger.json";
-});
-
-// Enable Swagger UI
+// -----------------------
+// Swagger Middleware
+// -----------------------
+app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Appointments API V1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Calendar App API V1");
+    c.RoutePrefix = string.Empty; // Swagger opens at root: http://localhost:5000/
 });
 
-// Use CORS
-app.UseCors("AllowReactApp");
-
-// Middleware
-app.UseRouting();
+// -----------------------
+// Authentication & Authorization
+// -----------------------
+app.UseAuthentication();
 app.UseAuthorization();
 
-// Map controllers
+// -----------------------
+// Map Controllers
+// -----------------------
 app.MapControllers();
-
-// Default API test route
-app.MapGet("/api", () => Results.Json(new
-{
-    status = "ok",
-    message = "API is running. Use /api/appointments for endpoints."
-}));
-
-// Optional: Generate static YAML file at startup
-var swaggerProvider = app.Services.GetRequiredService<Swashbuckle.AspNetCore.Swagger.ISwaggerProvider>();
-var swaggerDoc = swaggerProvider.GetSwagger("v1");
-
-app.MapGet("/swagger/v1/swagger.yaml", async (HttpContext context, ISwaggerProvider swaggerProvider) =>
-{
-    var swagger = swaggerProvider.GetSwagger("v1");
-    var sb = new StringBuilder();
-    var writer = new OpenApiYamlWriter(new StringWriter(sb));
-    swagger.SerializeAsV3(writer);
-    await context.Response.WriteAsync(sb.ToString());
-});
-
-Directory.CreateDirectory("SwaggerDocs"); // Ensure folder exists
-using (var stream = new StreamWriter("SwaggerDocs/api.yaml"))
-{
-    swaggerDoc.SerializeAsV3(new OpenApiYamlWriter(stream));
-}
 
 app.Run();

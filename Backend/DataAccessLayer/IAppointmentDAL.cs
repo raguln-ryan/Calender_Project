@@ -1,16 +1,15 @@
-using backend.Models;
+using Backend.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace backend.Repositories
+namespace Backend.DataAccessLayer
 {
-    public interface IAppointmentRepository
+    public interface IAppointmentDAL
     {
-        Task<List<Appointment>> GetAppointmentsByDateAsync(DateTime date);
-        Task<Appointment?> GetByIdAsync(int id);
-        Task<bool> HasConflictAsync(DateTime start, DateTime end);
-        Task AddAsync(Appointment appointment);
-        Task DeleteAsync(Appointment appointment);
-        Task SaveChangesAsync();
-
-        Task<List<Appointment>> GetAppointmentsInRangeAsync(DateTime start, DateTime end); // ✅ new
+        Task<IEnumerable<Appointment>> GetAppointmentsByUserAsync(int userId);
+        Task<Appointment> GetAppointmentByIdAsync(int id);
+        Task AddAppointmentAsync(Appointment appointment);
+        Task UpdateAppointmentAsync(Appointment appointment);
+        Task DeleteAppointmentAsync(int id);
     }
 }
