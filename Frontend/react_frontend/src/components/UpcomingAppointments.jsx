@@ -167,7 +167,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
                       className="edit-btn"
                       onClick={() => onEdit && onEdit(a)}
                     >
-                      ✏️ Edit
+                      ✏️ Edits
                     </button>
                     <button
                       className="delete-btn"
