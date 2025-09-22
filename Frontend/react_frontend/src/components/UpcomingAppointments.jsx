@@ -29,7 +29,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     fetchAppointments();
   }, [refreshTrigger]);
 
-  // Handle window resize
+  // Handle window resize to detect iPad/mobile
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
@@ -73,15 +73,28 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     );
   });
 
+  // Detect if device is tablet
+  const isTablet = windowWidth >= 768 && windowWidth <= 1280;
+
   return (
     <>
-      {/* Hamburger button: always only this for mobile & iPad */}
+      {/* Hamburger button: show only when sidebar is closed */}
       {!isOpen && (
         <button
           className="hamburger-btn"
           onClick={() => setIsOpen(true)}
         >
           ☰
+        </button>
+      )}
+
+      {/* Show Upcoming Appointments Button (iPad only) */}
+      {isTablet && !isOpen && (
+        <button
+          className="show-appointments-btn"
+          onClick={() => setIsOpen(true)}
+        >
+          Show Upcoming Appointments
         </button>
       )}
 
