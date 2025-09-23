@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ import navigate
+import { useNavigate } from "react-router-dom";
 import { getUpcomingAppointments, updateAppointment } from "../services/api";
 import TimeSlotGrid from "../components/TimeSlotGrid";
 import AddAppointmentModal from "../components/AddAppointmentModal";
@@ -9,7 +9,7 @@ import CalendarViewSelector from "../components/CalendarViewSelector";
 import "./CalendarPage.css";
 import moment from "moment";
 
-const CalendarPage = ({ setIsAuthenticated }) => { // ✅ receive from App.js
+const CalendarPage = ({ setIsAuthenticated }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
@@ -24,40 +24,26 @@ const CalendarPage = ({ setIsAuthenticated }) => { // ✅ receive from App.js
   const [searchQuery, setSearchQuery] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
 
-  const navigate = useNavigate(); // ✅ navigation hook
+  const navigate = useNavigate();
+  const isMobile = screenWidth < 600;
+  const isTablet = screenWidth >= 600 && screenWidth < 1024;
 
-  // ✅ Logout handler
+  // =========================
+  // Logout
+  // =========================
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
     navigate("/", { replace: true });
   };
 
-  const isMobile = screenWidth < 600;
-  const isTablet = screenWidth >= 600 && screenWidth < 1024;
-
-  useEffect(() => {
-    if (popupMessage) {
-      const timer = setTimeout(() => setPopupMessage(""), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [popupMessage]);
-
-  useEffect(() => {
-    const handleResize = () => setScreenWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    fetchAppointments();
-    fetchUpcomingAppointments();
-  }, [selectedDate]);
-
+  // =========================
+  // Fetch Appointments
+  // =========================
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await getUpcomingAppointments(30); // fetch next 30 days
+      const data = await getUpcomingAppointments(30);
       const filtered = data.filter(
         (a) =>
           moment(a.startTime).isSame(selectedDate, "day") ||
@@ -73,12 +59,98 @@ const CalendarPage = ({ setIsAuthenticated }) => { // ✅ receive from App.js
 
   const fetchUpcomingAppointments = async () => {
     try {
-      const data = await getUpcomingAppointments(7); // next 7 days
+      const data = await getUpcomingAppointments(7);
       setUpcomingAppointments(data);
     } catch (error) {
       console.error("Error fetching upcoming appointments:", error);
     }
   };
+
+  useEffect(() => {
+    fetchAppointments();
+    fetchUpcomingAppointments();
+  }, [selectedDate]);
+
+  // =========================
+  // Resize listener
+  // =========================
+  useEffect(() => {
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // =========================
+  // Popup auto-hide
+  // =========================
+  useEffect(() => {
+    if (popupMessage) {
+      const timer = setTimeout(() => setPopupMessage(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [popupMessage]);
+
+  // =========================
+  // Keyboard Shortcuts
+  // =========================
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const key = e.key.toLowerCase();
+      const shift = e.shiftKey;
+
+      switch (key) {
+        case "arrowleft":
+          setSelectedDate((prev) => moment(prev).subtract(1, "day").toDate());
+          break;
+        case "arrowright":
+          setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
+          break;
+        case "t":
+          setSelectedDate(new Date());
+          break;
+        case "n":
+          setSelectedAppointment(null);
+          setSelectedTimeSlot(null);
+          setShowModal(true);
+          break;
+        case "u":
+          setShowUpcoming((prev) => !prev);
+          break;
+        case "d":
+          setDarkMode((prev) => !prev);
+          document.body.classList.toggle("dark-mode");
+          break;
+        case "w":
+          setCalendarView("week");
+          break;
+        case "m":
+          setCalendarView("month");
+          break;
+        case "escape":
+          if (showModal) setShowModal(false);
+          break;
+        case ".":
+          if (shift) setSelectedDate((prev) => moment(prev).add(1, "week").toDate());
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showModal]);
+
+  // =========================
+  // Calendar Navigation Functions
+  // =========================
+  const goToPreviousDay = () =>
+    setSelectedDate((prev) => moment(prev).subtract(1, "day").toDate());
+
+  const goToNextDay = () =>
+    setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
+
+  const goToToday = () => setSelectedDate(new Date());
 
   const handleSlotClick = (timeSlot, appointment) => {
     if (appointment) setSelectedAppointment(appointment);
@@ -88,8 +160,6 @@ const CalendarPage = ({ setIsAuthenticated }) => { // ✅ receive from App.js
     }
     setShowModal(true);
   };
-
-  const handleDateChange = (date) => setSelectedDate(date);
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -107,20 +177,7 @@ const CalendarPage = ({ setIsAuthenticated }) => { // ✅ receive from App.js
     handleCloseModal();
   };
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.body.classList.toggle("dark-mode");
-  };
-
   const handleViewChange = (view) => setCalendarView(view);
-
-  const goToPreviousDay = () =>
-    setSelectedDate((prev) => moment(prev).subtract(1, "day").toDate());
-
-  const goToNextDay = () =>
-    setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
-
-  const goToToday = () => setSelectedDate(new Date());
 
   const handleEditUpcoming = (appointment) => {
     setSelectedAppointment(appointment);
@@ -169,6 +226,9 @@ const CalendarPage = ({ setIsAuthenticated }) => { // ✅ receive from App.js
     }
   };
 
+  // =========================
+  // Render
+  // =========================
   return (
     <div className={`calendar-container ${darkMode ? "dark-mode" : ""}`}>
       {popupMessage && (
@@ -235,13 +295,13 @@ const CalendarPage = ({ setIsAuthenticated }) => { // ✅ receive from App.js
             </div>
 
             <div className="right-section">
-              <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-
-              {/* ✅ Logout button */}
+              <ThemeToggle darkMode={darkMode} toggleDarkMode={() => {
+                setDarkMode(!darkMode);
+                document.body.classList.toggle("dark-mode");
+              }} />
               <button className="logout-btn" onClick={handleLogout}>
                 Logout
               </button>
-
               <button
                 className="add-appointment-btn"
                 onClick={() => {
@@ -261,7 +321,7 @@ const CalendarPage = ({ setIsAuthenticated }) => { // ✅ receive from App.js
               <input
                 type="date"
                 value={selectedDate.toISOString().split("T")[0]}
-                onChange={(e) => handleDateChange(new Date(e.target.value))}
+                onChange={(e) => setSelectedDate(new Date(e.target.value))}
               />
             </div>
             <CalendarViewSelector

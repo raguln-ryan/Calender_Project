@@ -35,9 +35,9 @@
 }
 
 .upcoming-sidebar.open {
-  width: 320px; /* ✅ Increased width for more space */
+  width: 320px;
   padding: 15px;
-  overflow-y: auto; /* ✅ enable scrolling */
+  overflow-y: auto;
 }
 
 .dark-mode .upcoming-sidebar {
@@ -45,9 +45,8 @@
   border-color: #444;
 }
 
-/* Make sure sidebar is above overlay */
 .upcoming-sidebar {
-  z-index: 1000; /* ✅ Higher than overlay */
+  z-index: 1000;
 }
 
 /* Main calendar content */
@@ -55,26 +54,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  transition: margin-left 0.3s ease-in-out;
-}
-
-/* =========================
-   SEARCH INPUT
-========================= */
-.search-input {
   width: 100%;
-  padding: 8px 12px;
-  margin: 10px 0 15px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  transition: border 0.2s, box-shadow 0.2s;
-}
-
-.search-input:focus {
-  border-color: #2196f3;
-  box-shadow: 0 0 4px rgba(33, 150, 243, 0.4);
+  transition: margin-left 0.3s ease-in-out;
 }
 
 /* =========================
@@ -84,7 +65,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 12px 16px;
   background: #3f51b5;
   color: white;
   position: sticky;
@@ -95,7 +76,7 @@
 /* Toggle upcoming sidebar button */
 .toggle-upcoming-btn {
   background: #4caf50;
-  color: rgb(255, 255, 255);
+  color: #fff;
   border: none;
   padding: 6px 12px;
   border-radius: 4px;
@@ -116,26 +97,25 @@
 
 .center-section h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 20px;
 }
 
 .date-navigation {
-  margin-top: 8px;
+  margin-top: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .date-navigation button {
   padding: 5px 10px;
-  font-size: 16px;
+  font-size: 14px;
   background: white;
   color: #3f51b5;
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
 .date-navigation button:hover {
@@ -146,22 +126,21 @@
 .right-section {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* Add Appointment button */
 .add-appointment-btn {
   background: #4caf50;
   color: white;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  transition: 0.2s;
+  gap: 4px;
+  font-size: 13px;
 }
 
 .add-appointment-btn:hover {
@@ -169,7 +148,7 @@
 }
 
 .plus-icon {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 /* =========================
@@ -192,13 +171,12 @@
 }
 
 .upcoming-appointments li {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   padding: 8px;
-  background: #4caf50;
+  background: #2196f3; /* ✅ blue for mobile too */
   color: white;
-  border-left: 4px solid #2e7d32;
+  border-left: 4px solid #1565c0;
   border-radius: 6px;
-  transition: transform 0.2s;
 }
 
 .upcoming-appointments li:hover {
@@ -206,8 +184,8 @@
 }
 
 .dark-mode .upcoming-appointments li {
-  background: #2e7d32;
-  border-left-color: #81c784;
+  background: #1565c0;
+  border-left-color: #64b5f6;
 }
 
 /* =========================
@@ -217,7 +195,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
+  padding: 10px 16px;
   background: #fafafa;
   border-bottom: 1px solid #ddd;
 }
@@ -240,11 +218,12 @@
 .calendar-grid td,
 .calendar-grid .calendar-cell {
   border: 1px solid #ddd;
-  padding: 10px;
+  padding: 8px;
   text-align: center;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #fff;
   transition: background 0.2s, transform 0.2s;
+  word-wrap: break-word; /* ✅ prevent overflow */
 }
 
 .calendar-grid td:hover,
@@ -265,12 +244,14 @@
 .appointment {
   background: #2196f3 !important;
   color: white !important;
-  padding: 6px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  font-size: 12px;
   text-align: center;
   cursor: pointer;
-  transition: background 0.2s ease-in-out;
+  display: block;
+  width: 100%; /* ✅ make full cell width */
+  box-sizing: border-box;
 }
 
 .appointment:hover {
@@ -280,15 +261,6 @@
 .dark-mode .appointment {
   background: #1565c0 !important;
   color: #e3f2fd !important;
-}
-
-/* =========================
-   LOADING
-========================= */
-.loading-container {
-  text-align: center;
-  padding: 20px;
-  font-size: 16px;
 }
 
 /* =========================
@@ -305,14 +277,16 @@
     left: -260px;
     width: 250px;
     height: 100%;
-    background: white;
+    background: #2196f3; /* ✅ sidebar matches appointment color */
+    color: white;
     transition: left 0.3s ease-in-out;
-    z-index: 1000; /* ✅ above overlay */
+    z-index: 1000;
+    padding: 15px;
   }
 
   .upcoming-sidebar.open {
     left: 0;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
   }
 
   .calendar-main {
@@ -322,76 +296,17 @@
   .calendar-controls {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 6px;
   }
-}
 
-/* =========================
-   POPUP MESSAGE
-========================= */
-.popup-message {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgb(24, 182, 32);
-  color: white;
-  padding: 16px 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-  min-width: 250px;
-  text-align: center;
-}
+  .calendar-grid td,
+  .calendar-grid .calendar-cell {
+    padding: 6px;
+    font-size: 12px;
+  }
 
-.popup-message .close-popup {
-  background: transparent;
-  border: none;
-  color: white;
-  font-weight: bold;
-  margin-left: 12px;
-  cursor: pointer;
-  font-size: 1.2rem;
-}
-
-/* =========================
-   HAMBURGER
-========================= */
-.hamburger-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  margin-right: 12px;
-}
-
-/* =========================
-   OVERLAY
-========================= */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 500; /* ✅ stays behind sidebar */
-}
-.logout-btn {
-  background: #e63946;
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s ease;
-}
-
-.logout-btn:hover {
-  background: #d62828;
+  .appointment {
+    font-size: 11px;
+    padding: 4px 2px;
+  }
 }
