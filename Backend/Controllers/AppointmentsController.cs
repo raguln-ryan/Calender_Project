@@ -1,4 +1,5 @@
 using Backend.BusinessLayer;
+using Backend.DTOs;
 using Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,42 +20,71 @@ namespace Backend.Controllers
             _appointmentBL = appointmentBL;
         }
 
-        private int GetUserId()
+        // Helper: get user ID from JWT token
+        private async Task<int> GetUserIdAsync()
         {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (claim == null)
-                throw new UnauthorizedAccessException("User ID claim not found in token.");
-            return int.Parse(claim.Value);
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userClaim))
+                throw new Exception("User ID claim is missing.");
+
+            if (int.TryParse(userClaim, out int userId))
+                return userId;
+
+            var user = await _appointmentBL.GetUserByUsernameAsync(userClaim);
+            if (user == null)
+                throw new Exception("User not found.");
+
+            return user.Id;
         }
 
-
+        // GET: api/appointments/upcoming
         [HttpGet("upcoming")]
         public async Task<IActionResult> GetUpcomingAppointments()
         {
-            var appointments = await _appointmentBL.GetAppointmentsByUserAsync(GetUserId());
+            var userId = await GetUserIdAsync();
+            var appointments = await _appointmentBL.GetAppointmentsByUserAsync(userId);
             return Ok(appointments);
         }
 
+        // POST: api/appointments
         [HttpPost]
-        public async Task<IActionResult> CreateAppointment(Appointment appointment)
+        public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentDto dto)
         {
-            appointment.UserId = GetUserId();
-            var created = await _appointmentBL.CreateAppointmentAsync(appointment);
-            return Ok(created);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userId = await GetUserIdAsync();
+            var created = await _appointmentBL.CreateAppointmentAsync(dto, userId);
+
+            return CreatedAtAction(nameof(GetUpcomingAppointments), new { id = created.Id }, created);
         }
 
+        // PUT: api/appointments/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAppointment(int id, Appointment appointment)
+        public async Task<IActionResult> UpdateAppointment(int id, [FromBody] UpdateAppointmentDto dto)
         {
-            appointment.Id = id;
-            await _appointmentBL.UpdateAppointmentAsync(appointment, GetUserId());
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userId = await GetUserIdAsync();
+            var updated = await _appointmentBL.UpdateAppointmentAsync(id, dto, userId);
+
+            if (!updated)
+                return NotFound();
+
             return NoContent();
         }
 
+        // DELETE: api/appointments/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
-            await _appointmentBL.DeleteAppointmentAsync(id, GetUserId());
+            var userId = await GetUserIdAsync();
+            var deleted = await _appointmentBL.DeleteAppointmentAsync(id, userId);
+
+            if (!deleted)
+                return NotFound();
+
             return NoContent();
         }
     }

@@ -4,12 +4,12 @@ import "../styles/AddAppointmentModal.css";
 
 const AddAppointmentModal = ({
   onClose,
-  selectedDate, // ✅ clicked date from week/month view
+  selectedDate,
   onAdd,
   appointmentToEdit,
   setPopupMessage,
 }) => {
-  const [title, setTitle] = useState(""); //initializes the state with an empty string.
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -28,25 +28,21 @@ const AddAppointmentModal = ({
     Personal: "#9C27B0",
   };
 
-  // ✅ Sync date if parent changes selectedDate (week/month click)
+  // Sync date if parent changes selectedDate
   useEffect(() => {
-    if (selectedDate) {
-      setDate(new Date(selectedDate));
-    }
+    if (selectedDate) setDate(new Date(selectedDate));
   }, [selectedDate]);
 
-  // ✅ Close on Escape
+  // Close on Escape
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
+      if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  // ✅ Load data if editing existing appointment
+  // Load data if editing existing appointment
   useEffect(() => {
     if (appointmentToEdit) {
       setTitle(appointmentToEdit.title || "");
@@ -58,7 +54,7 @@ const AddAppointmentModal = ({
     }
   }, [appointmentToEdit]);
 
-  // ✅ Validation
+  // Validation
   useEffect(() => {
     const newErrors = {};
     if (title.trim()) {
@@ -82,12 +78,10 @@ const AddAppointmentModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (Object.keys(error).length > 0 || !title || !startTime || !endTime)
-      return;
+    if (Object.keys(error).length > 0 || !title || !startTime || !endTime) return;
 
     setIsSubmitting(true);
 
-    // ✅ Ensure appointment is created on selectedDate
     const formattedDate = date.toISOString().split("T")[0];
     const startDateTime = new Date(`${formattedDate}T${startTime}`);
     const endDateTime = new Date(`${formattedDate}T${endTime}`);
@@ -104,10 +98,7 @@ const AddAppointmentModal = ({
     try {
       let savedAppointment;
       if (appointmentToEdit) {
-        savedAppointment = await updateAppointment(
-          appointmentToEdit.id,
-          appointmentData
-        );
+        savedAppointment = await updateAppointment(appointmentToEdit.id, appointmentData);
         setPopupMessage?.("Appointment updated successfully!");
       } else {
         savedAppointment = await createAppointment(appointmentData);
@@ -118,17 +109,14 @@ const AddAppointmentModal = ({
       onClose();
     } catch (err) {
       console.error("Error saving appointment:", err);
-      if (err.response?.data?.message) {
-        setPopupMessage?.(err.response.data.message);
-      } else {
-        setPopupMessage?.("Appointment conflict detected.");
-      }
+      setPopupMessage?.(
+        err.message || "Could not save appointment. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // ✅ Get today for min date restriction
   const today = new Date().toISOString().split("T")[0];
 
   return (
@@ -152,11 +140,9 @@ const AddAppointmentModal = ({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Appointment title"
               required
-              maxLength={TITLE_LIMIT} // ✅ Block extra chars
+              maxLength={TITLE_LIMIT}
             />
-            <div className="char-counter">
-              {title.length}/{TITLE_LIMIT}
-            </div>
+            <div className="char-counter">{title.length}/{TITLE_LIMIT}</div>
             {error.title && <span className="error-text">{error.title}</span>}
           </div>
 
@@ -167,16 +153,12 @@ const AddAppointmentModal = ({
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add details about this appointment"
+              placeholder="Add details"
               rows="3"
-              maxLength={DESCRIPTION_LIMIT} // ✅ Block extra chars
+              maxLength={DESCRIPTION_LIMIT}
             />
-            <div className="char-counter">
-              {description.length}/{DESCRIPTION_LIMIT}
-            </div>
-            {error.description && (
-              <span className="error-text">{error.description}</span>
-            )}
+            <div className="char-counter">{description.length}/{DESCRIPTION_LIMIT}</div>
+            {error.description && <span className="error-text">{error.description}</span>}
           </div>
 
           {/* Type */}
@@ -189,27 +171,25 @@ const AddAppointmentModal = ({
               style={{ borderLeft: `10px solid ${typeColors[type]}` }}
             >
               {Object.keys(typeColors).map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
+                <option key={t} value={t}>{t}</option>
               ))}
             </select>
           </div>
 
-          {/* Date (auto-filled from selectedDate) */}
-          <div className="form-group date-picker-group">
+          {/* Date */}
+          <div className="form-group">
             <label htmlFor="date">Date *</label>
             <input
               type="date"
               id="date"
               value={date.toISOString().split("T")[0]}
               onChange={(e) => setDate(new Date(e.target.value))}
-              min={today} // ✅ Prevent past dates
+              min={today}
               required
             />
           </div>
 
-          {/* Start Time */}
+          {/* Start & End Time */}
           <div className="form-group">
             <label htmlFor="startTime">Start Time *</label>
             <select
@@ -220,14 +200,11 @@ const AddAppointmentModal = ({
             >
               <option value="">Select start time</option>
               {generateTimeOptions().map((t) => (
-                <option key={t} value={t}>
-                  {formatTimeForDisplay(t)}
-                </option>
+                <option key={t} value={t}>{formatTimeForDisplay(t)}</option>
               ))}
             </select>
           </div>
 
-          {/* End Time */}
           <div className="form-group">
             <label htmlFor="endTime">End Time *</label>
             <select
@@ -238,21 +215,14 @@ const AddAppointmentModal = ({
             >
               <option value="">Select end time</option>
               {generateTimeOptions().map((t) => (
-                <option key={t} value={t}>
-                  {formatTimeForDisplay(t)}
-                </option>
+                <option key={t} value={t}>{formatTimeForDisplay(t)}</option>
               ))}
             </select>
             {error.endTime && <span className="error-text">{error.endTime}</span>}
           </div>
 
           <div className="form-actions">
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
+            <button type="button" className="cancel-btn" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
             <button
@@ -261,11 +231,7 @@ const AddAppointmentModal = ({
               disabled={isSubmitting || Object.keys(error).length > 0}
               style={{ backgroundColor: typeColors[type] }}
             >
-              {isSubmitting
-                ? "Saving..."
-                : appointmentToEdit
-                ? "Update"
-                : "Create"}
+              {isSubmitting ? "Saving..." : appointmentToEdit ? "Update" : "Create"}
             </button>
           </div>
         </form>
@@ -274,6 +240,7 @@ const AddAppointmentModal = ({
   );
 };
 
+// Generate time slots in 30 min increments
 const generateTimeOptions = () => {
   const options = [];
   for (let hour = 0; hour <= 23; hour++) {

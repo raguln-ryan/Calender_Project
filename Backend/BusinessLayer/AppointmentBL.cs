@@ -1,57 +1,80 @@
-using Backend.DataAccessLayer;
+using Backend.Data;
+using Backend.DTOs;
 using Backend.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Backend.BusinessLayer
 {
     public class AppointmentBL : IAppointmentBL
     {
-        private readonly IAppointmentDAL _appointmentDAL;
+        private readonly AppDbContext _context;
 
-        public AppointmentBL(IAppointmentDAL appointmentDAL)
+        public AppointmentBL(AppDbContext context)
         {
-            _appointmentDAL = appointmentDAL;
+            _context = context;
         }
 
-        public async Task<IEnumerable<Appointment>> GetAppointmentsByUserAsync(int userId)
+        public async Task<List<Appointment>> GetAppointmentsByUserAsync(int userId)
         {
-            return await _appointmentDAL.GetAppointmentsByUserAsync(userId);
+            return await _context.Appointments
+                                 .AsNoTracking()
+                                 .Where(a => a.UserId == userId)
+                                 .ToListAsync();
         }
 
-        public async Task<Appointment> GetAppointmentByIdAsync(int id, int userId)
+        public async Task<Appointment> CreateAppointmentAsync(CreateAppointmentDto dto, int userId)
         {
-            var appointment = await _appointmentDAL.GetAppointmentByIdAsync(id);
-            if (appointment == null || appointment.UserId != userId)
-                return null;
+            var appointment = new Appointment
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                StartTime = dto.StartTime,
+                EndTime = dto.EndTime,
+                UserId = userId,
+                CreatedAt = System.DateTime.UtcNow
+            };
+
+            _context.Appointments.Add(appointment);
+            await _context.SaveChangesAsync();
+
             return appointment;
         }
 
-        public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
+        public async Task<bool> UpdateAppointmentAsync(int id, UpdateAppointmentDto dto, int userId)
         {
-            await _appointmentDAL.AddAppointmentAsync(appointment);
-            return appointment;
+            var existing = await _context.Appointments
+                                         .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
+            if (existing == null)
+                return false;
+
+            existing.Title = dto.Title;
+            existing.Description = dto.Description;
+            existing.StartTime = dto.StartTime;
+            existing.EndTime = dto.EndTime;
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task UpdateAppointmentAsync(Appointment appointment, int userId)
+        public async Task<bool> DeleteAppointmentAsync(int id, int userId)
         {
-            var existing = await _appointmentDAL.GetAppointmentByIdAsync(appointment.Id);
-            if (existing == null || existing.UserId != userId)
-                throw new System.Exception("Unauthorized");
+            var appointment = await _context.Appointments
+                                            .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
+            if (appointment == null) return false;
 
-            existing.Title = appointment.Title;
-            existing.Date = appointment.Date;
-
-            await _appointmentDAL.UpdateAppointmentAsync(existing);
+            _context.Appointments.Remove(appointment);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task DeleteAppointmentAsync(int id, int userId)
+        public async Task<User?> GetUserByUsernameAsync(string username)
         {
-            var appointment = await _appointmentDAL.GetAppointmentByIdAsync(id);
-            if (appointment == null || appointment.UserId != userId)
-                throw new System.Exception("Unauthorized");
-
-            await _appointmentDAL.DeleteAppointmentAsync(id);
+            return await _context.Users
+                                 .AsNoTracking()
+                                 .FirstOrDefaultAsync(u => u.Username == username);
         }
     }
 }

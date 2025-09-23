@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "2QDvGHP9Jq0=",
+  "dgSpecHash": "3Zy3D4vksz4=",
   "success": true,
   "projectFilePath": "C:\\Users\\ragul.n_disprz\\calender_app\\Backend\\Backend.csproj",
   "expectedPackageFiles": [
@@ -94,16 +94,5 @@
     "C:\\Users\\ragul.n_disprz\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512",
     "C:\\Users\\ragul.n_disprz\\.nuget\\packages\\yamldotnet\\16.3.0\\yamldotnet.16.3.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Backend depends on Pomelo.EntityFrameworkCore.MySql (>= 8.0.5) but Pomelo.EntityFrameworkCore.MySql 8.0.5 was not found. An approximate best match of Pomelo.EntityFrameworkCore.MySql 9.0.0 was resolved.",
-      "libraryId": "Pomelo.EntityFrameworkCore.MySql",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    }
-  ]
+  "logs": []
 }

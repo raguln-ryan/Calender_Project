@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  getAppointments,
-  getUpcomingAppointments,
-  updateAppointment,
-} from "../services/api";
+import { useNavigate } from "react-router-dom"; // ✅ import navigate
+import { getUpcomingAppointments, updateAppointment } from "../services/api";
 import TimeSlotGrid from "../components/TimeSlotGrid";
 import AddAppointmentModal from "../components/AddAppointmentModal";
 import UpcomingAppointments from "../components/UpcomingAppointments";
@@ -12,7 +9,7 @@ import CalendarViewSelector from "../components/CalendarViewSelector";
 import "./CalendarPage.css";
 import moment from "moment";
 
-const CalendarPage = () => {
+const CalendarPage = ({ setIsAuthenticated }) => { // ✅ receive from App.js
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
@@ -27,12 +24,18 @@ const CalendarPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
 
-  // Breakpoints
-  const isMobile = screenWidth < 600; // small phones
-  const isTablet = screenWidth >= 600 && screenWidth < 1024; // tablets
-  const isDesktop = screenWidth >= 1024; // desktops
+  const navigate = useNavigate(); // ✅ navigation hook
 
-  // Auto-hide popup after 3s
+  // ✅ Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
+    navigate("/", { replace: true });
+  };
+
+  const isMobile = screenWidth < 600;
+  const isTablet = screenWidth >= 600 && screenWidth < 1024;
+
   useEffect(() => {
     if (popupMessage) {
       const timer = setTimeout(() => setPopupMessage(""), 3000);
@@ -40,7 +43,6 @@ const CalendarPage = () => {
     }
   }, [popupMessage]);
 
-  // Listen for screen resize
   useEffect(() => {
     const handleResize = () => setScreenWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
@@ -49,71 +51,19 @@ const CalendarPage = () => {
 
   useEffect(() => {
     fetchAppointments();
-  }, [selectedDate]);
-
-  useEffect(() => {
     fetchUpcomingAppointments();
-  }, []);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
-        return;
-      switch (e.key) {
-        case "ArrowLeft":
-          e.preventDefault();
-          setSelectedDate((prev) =>
-            e.shiftKey
-              ? moment(prev).subtract(1, "week").toDate()
-              : moment(prev).subtract(1, "day").toDate()
-          );
-          break;
-        case "ArrowRight":
-          e.preventDefault();
-          setSelectedDate((prev) =>
-            e.shiftKey
-              ? moment(prev).add(1, "week").toDate()
-              : moment(prev).add(1, "day").toDate()
-          );
-          break;
-        case "d":
-        case "D":
-          setCalendarView("day");
-          break;
-        case "w":
-        case "W":
-          setCalendarView("week");
-          break;
-        case "m":
-        case "M":
-          setCalendarView("month");
-          break;
-        case "n":
-        case "N":
-          setSelectedAppointment(null);
-          setSelectedTimeSlot(null);
-          setShowModal(true);
-          break;
-        case "Escape":
-          if (showModal) setShowModal(false);
-          if (showUpcoming) setShowUpcoming(false);
-          break;
-        default:
-          break;
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showModal, showUpcoming]);
+  }, [selectedDate]);
 
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await getAppointments(
-        moment(selectedDate).format("YYYY-MM-DD")
+      const data = await getUpcomingAppointments(30); // fetch next 30 days
+      const filtered = data.filter(
+        (a) =>
+          moment(a.startTime).isSame(selectedDate, "day") ||
+          moment(a.endTime).isSame(selectedDate, "day")
       );
-      setAppointments(data);
+      setAppointments(filtered);
     } catch (error) {
       console.error("Error fetching appointments:", error);
     } finally {
@@ -123,7 +73,7 @@ const CalendarPage = () => {
 
   const fetchUpcomingAppointments = async () => {
     try {
-      const data = await getUpcomingAppointments();
+      const data = await getUpcomingAppointments(7); // next 7 days
       setUpcomingAppointments(data);
     } catch (error) {
       console.error("Error fetching upcoming appointments:", error);
@@ -148,15 +98,11 @@ const CalendarPage = () => {
   };
 
   const handleAppointmentAdded = (newAppointment, isEdit = false) => {
-    setAppointments((prev) => {
-      if (isEdit) {
-        return prev.map((app) =>
-          app.id === newAppointment.id ? newAppointment : app
-        );
-      } else {
-        return [...prev, newAppointment];
-      }
-    });
+    setAppointments((prev) =>
+      isEdit
+        ? prev.map((app) => (app.id === newAppointment.id ? newAppointment : app))
+        : [...prev, newAppointment]
+    );
     fetchUpcomingAppointments();
     handleCloseModal();
   };
@@ -185,7 +131,7 @@ const CalendarPage = () => {
   const filteredAppointments = appointments.filter(
     (a) =>
       a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.type?.toLowerCase().includes(searchQuery.toLowerCase())
+      a.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleMoveAppointment = async (appointmentId, newDate, newTime) => {
@@ -228,16 +174,17 @@ const CalendarPage = () => {
       {popupMessage && (
         <div className="popup-message">
           {popupMessage}
-          <button
-            className="close-popup"
-            onClick={() => setPopupMessage("")}
-          >
+          <button className="close-popup" onClick={() => setPopupMessage("")}>
             ✖
           </button>
         </div>
       )}
 
-      <div className={`calendar-layout ${isMobile ? "mobile" : isTablet ? "tablet" : "desktop"}`}>
+      <div
+        className={`calendar-layout ${
+          isMobile ? "mobile" : isTablet ? "tablet" : "desktop"
+        }`}
+      >
         {isMobile && showUpcoming && (
           <div className="overlay" onClick={() => setShowUpcoming(false)}></div>
         )}
@@ -268,9 +215,7 @@ const CalendarPage = () => {
                 className="toggle-upcoming-btn"
                 onClick={() => setShowUpcoming(!showUpcoming)}
               >
-                <span style={{ fontSize: "1.2rem", marginRight: "6px" }}>
-                  📌
-                </span>
+                <span style={{ fontSize: "1.2rem", marginRight: "6px" }}>📌</span>
                 {showUpcoming
                   ? "Hide Upcoming Appointments"
                   : "Show Upcoming Appointments"}
@@ -291,6 +236,12 @@ const CalendarPage = () => {
 
             <div className="right-section">
               <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+
+              {/* ✅ Logout button */}
+              <button className="logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
+
               <button
                 className="add-appointment-btn"
                 onClick={() => {

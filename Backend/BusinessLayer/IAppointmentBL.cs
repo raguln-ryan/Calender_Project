@@ -1,3 +1,4 @@
+using Backend.DTOs;
 using Backend.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -6,10 +7,10 @@ namespace Backend.BusinessLayer
 {
     public interface IAppointmentBL
     {
-        Task<IEnumerable<Appointment>> GetAppointmentsByUserAsync(int userId);
-        Task<Appointment> GetAppointmentByIdAsync(int id, int userId);
-        Task<Appointment> CreateAppointmentAsync(Appointment appointment);
-        Task UpdateAppointmentAsync(Appointment appointment, int userId);
-        Task DeleteAppointmentAsync(int id, int userId);
+        Task<List<Appointment>> GetAppointmentsByUserAsync(int userId);
+        Task<Appointment> CreateAppointmentAsync(CreateAppointmentDto dto, int userId);
+        Task<bool> UpdateAppointmentAsync(int id, UpdateAppointmentDto dto, int userId);
+        Task<bool> DeleteAppointmentAsync(int id, int userId);
+        Task<User?> GetUserByUsernameAsync(string username); // username lookup
     }
 }

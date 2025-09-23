@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Backend.BusinessLayer;
 
 namespace Backend.BusinessLayer
 {
@@ -81,6 +82,16 @@ namespace Backend.BusinessLayer
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public Task<User?> ValidateUserAsync(string username, string password)
+        {
+            return _userDAL.ValidateUserAsync(username, password);
+        }
+
+        public Task<User?> GetUserByUsernameAsync(string username)
+        {
+            return _userDAL.GetUserByUsernameAsync(username);
         }
     }
 }

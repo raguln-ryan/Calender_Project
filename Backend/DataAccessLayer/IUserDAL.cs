@@ -6,5 +6,6 @@ namespace Backend.DataAccessLayer
     {
         Task<User> GetUserByUsernameAsync(string username);
         Task AddUserAsync(User user);
+        Task<User?> ValidateUserAsync(string username, string password);
     }
 }

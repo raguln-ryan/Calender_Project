@@ -6,5 +6,10 @@ namespace Backend.BusinessLayer
     {
         Task<User> RegisterAsync(string username, string password);
         Task<string> LoginAsync(string username, string password);
+        Task<User?> ValidateUserAsync(string username, string password);
+         
+         Task<User> GetUserByUsernameAsync(string username);
+
+
     }
 }
