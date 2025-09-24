@@ -27,6 +27,9 @@ namespace Backend.BusinessLayer
 
         public async Task<Appointment> CreateAppointmentAsync(CreateAppointmentDto dto, int userId)
         {
+            if (await HasConflictAsync(userId, dto.StartTime, dto.EndTime))
+                throw new System.Exception("Appointment conflicts with an existing appointment.");
+
             var appointment = new Appointment
             {
                 Title = dto.Title,
@@ -49,6 +52,10 @@ namespace Backend.BusinessLayer
                                          .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
             if (existing == null)
                 return false;
+            // Check for conflicts excluding current appointment
+            if (await HasConflictAsync(userId, dto.StartTime, dto.EndTime, id))
+                throw new System.Exception("Updated appointment conflicts with an existing appointment.");
+
 
             existing.Title = dto.Title;
             existing.Description = dto.Description;
@@ -75,6 +82,19 @@ namespace Backend.BusinessLayer
             return await _context.Users
                                  .AsNoTracking()
                                  .FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+         public async Task<bool> HasConflictAsync(int userId, System.DateTime startTime, System.DateTime endTime, int? excludeAppointmentId = null)
+        {
+            var query = _context.Appointments
+                                .Where(a => a.UserId == userId &&
+                                            a.StartTime < endTime &&
+                                            a.EndTime > startTime);
+
+            if (excludeAppointmentId.HasValue)
+                query = query.Where(a => a.Id != excludeAppointmentId.Value);
+
+            return await query.AnyAsync();
         }
     }
 }

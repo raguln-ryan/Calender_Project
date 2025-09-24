@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { createAppointment, updateAppointment } from "../services/api";
 import "../styles/AddAppointmentModal.css";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddAppointmentModal = ({
   onClose,
@@ -77,45 +79,49 @@ const AddAppointmentModal = ({
   }, [title, description, startTime, endTime]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (Object.keys(error).length > 0 || !title || !startTime || !endTime) return;
+  e.preventDefault();
+  if (Object.keys(error).length > 0 || !title || !startTime || !endTime) return;
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    const formattedDate = date.toISOString().split("T")[0];
-    const startDateTime = new Date(`${formattedDate}T${startTime}`);
-    const endDateTime = new Date(`${formattedDate}T${endTime}`);
+  const formattedDate = date.toISOString().split("T")[0];
+  const startDateTime = new Date(`${formattedDate}T${startTime}`);
+  const endDateTime = new Date(`${formattedDate}T${endTime}`);
 
-    const appointmentData = {
-      title,
-      description,
-      type,
-      color: typeColors[type],
-      startTime: startDateTime.toISOString(),
-      endTime: endDateTime.toISOString(),
-    };
-
-    try {
-      let savedAppointment;
-      if (appointmentToEdit) {
-        savedAppointment = await updateAppointment(appointmentToEdit.id, appointmentData);
-        setPopupMessage?.("Appointment updated successfully!");
-      } else {
-        savedAppointment = await createAppointment(appointmentData);
-        setPopupMessage?.("Appointment created successfully!");
-      }
-
-      onAdd(savedAppointment, !!appointmentToEdit);
-      onClose();
-    } catch (err) {
-      console.error("Error saving appointment:", err);
-      setPopupMessage?.(
-        err.message || "Could not save appointment. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+  const appointmentData = {
+    title,
+    description,
+    type,
+    color: typeColors[type],
+    startTime: startDateTime.toISOString(),
+    endTime: endDateTime.toISOString(),
   };
+
+  try {
+    let savedAppointment;
+    if (appointmentToEdit) {
+      savedAppointment = await updateAppointment(appointmentToEdit.id, appointmentData);
+      toast.success("Appointment updated successfully!");
+    } else {
+      savedAppointment = await createAppointment(appointmentData);
+      toast.success("Appointment created successfully!");
+    }
+
+    onAdd(savedAppointment, !!appointmentToEdit);
+    onClose();
+  } catch (err) {
+    toast.error("Conflict! This time slot is already booked.");
+    
+    // ✅ Conflict handling
+    if (err.status === 409 || err.message.toLowerCase().includes("conflict") || err.message.toLowerCase().includes("taken")) {
+      toast.error("Conflict! This time slot is already booked.");
+    } else {
+      setPopupMessage?.(err.message || "Could not save appointment. Please try again.");
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const today = new Date().toISOString().split("T")[0];
 

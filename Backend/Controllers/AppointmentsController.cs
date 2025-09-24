@@ -54,9 +54,17 @@ namespace Backend.Controllers
                 return BadRequest(ModelState);
 
             var userId = await GetUserIdAsync();
-            var created = await _appointmentBL.CreateAppointmentAsync(dto, userId);
-
-            return CreatedAtAction(nameof(GetUpcomingAppointments), new { id = created.Id }, created);
+            try
+            {
+                var created = await _appointmentBL.CreateAppointmentAsync(dto, userId);
+                return CreatedAtAction(nameof(GetUpcomingAppointments), new { id = created.Id }, created);
+            }
+            catch (System.Exception ex)
+            {
+                if (ex.Message.Contains("conflict"))
+                    return Conflict(new { message = ex.Message });
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // PUT: api/appointments/{id}
@@ -67,12 +75,19 @@ namespace Backend.Controllers
                 return BadRequest(ModelState);
 
             var userId = await GetUserIdAsync();
-            var updated = await _appointmentBL.UpdateAppointmentAsync(id, dto, userId);
-
-            if (!updated)
-                return NotFound();
-
-            return NoContent();
+             try
+            {
+                var updated = await _appointmentBL.UpdateAppointmentAsync(id, dto, userId);
+                if (!updated)
+                    return NotFound();
+                return NoContent();
+            }
+            catch (System.Exception ex)
+            {
+                if (ex.Message.Contains("conflict"))
+                    return Conflict(new { message = ex.Message });
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // DELETE: api/appointments/{id}

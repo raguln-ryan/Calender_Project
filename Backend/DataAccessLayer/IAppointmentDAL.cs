@@ -11,5 +11,7 @@ namespace Backend.DataAccessLayer
         Task AddAppointmentAsync(Appointment appointment);
         Task UpdateAppointmentAsync(Appointment appointment);
         Task DeleteAppointmentAsync(int id);
+
+        Task<bool> HasConflictAsync(Appointment appointment, int? excludeId = null);
     }
 }

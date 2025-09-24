@@ -12,5 +12,7 @@ namespace Backend.BusinessLayer
         Task<bool> UpdateAppointmentAsync(int id, UpdateAppointmentDto dto, int userId);
         Task<bool> DeleteAppointmentAsync(int id, int userId);
         Task<User?> GetUserByUsernameAsync(string username); // username lookup
+
+        Task<bool> HasConflictAsync(int userId, System.DateTime startTime, System.DateTime endTime, int? excludeAppointmentId = null);
     }
 }

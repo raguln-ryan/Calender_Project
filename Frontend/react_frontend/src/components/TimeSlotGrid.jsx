@@ -2,7 +2,6 @@ import React from "react";
 import "../styles/TimeSlotGrid.css";
 
 const TimeSlotGrid = ({ appointments, selectedDate, onSlotClick, view, onMoveAppointment }) => {
-  // Normalize appointments so that each has "date": "YYYY-MM-DD" and "time": "HH:mm"
   const normalizedAppointments = normalizeAppointments(appointments);
 
   if (view === "week") {
@@ -14,25 +13,20 @@ const TimeSlotGrid = ({ appointments, selectedDate, onSlotClick, view, onMoveApp
   }
 };
 
-// Helper to normalize the appointment objects
+// Normalize appointments
 function normalizeAppointments(appts) {
   return appts.map((app) => {
     const start = new Date(app.startTime);
-    const date = start.toISOString().split("T")[0]; // "YYYY-MM-DD"
+    const date = start.toISOString().split("T")[0];
     const hours = start.getHours().toString().padStart(2, "0");
     const mins = start.getMinutes().toString().padStart(2, "0");
-    const time = `${hours}:${mins}`; // "HH:mm"
-    return {
-      ...app,
-      date,
-      time,
-    };
+    const time = `${hours}:${mins}`;
+    return { ...app, date, time };
   });
 }
 
-// Day view rendering
+// Day view
 const renderDayView = (appointments, selectedDate, onSlotClick, onMoveAppointment) => {
-  // Generate time slots for the day: every hour and every 30 min between 00:00 to 23:30
   const timeSlots = [];
   for (let hour = 0; hour <= 23; hour++) {
     const hh = hour.toString().padStart(2, "0");
@@ -41,13 +35,14 @@ const renderDayView = (appointments, selectedDate, onSlotClick, onMoveAppointmen
   }
 
   const dateString = selectedDate.toISOString().split("T")[0];
-  const appointmentsForDay = appointments.filter((appointment) => appointment.date === dateString);
+  const appointmentsForDay = appointments.filter((a) => a.date === dateString);
 
   const handleDrop = (e, newTime) => {
     e.preventDefault();
     removeDragOverClass(e.currentTarget);
     const appointmentId = e.dataTransfer.getData("appointmentId");
     if (appointmentId && onMoveAppointment) {
+      // ✅ Pass to parent handler and let it handle conflicts
       onMoveAppointment(appointmentId, dateString, newTime);
     }
   };
@@ -56,7 +51,6 @@ const renderDayView = (appointments, selectedDate, onSlotClick, onMoveAppointmen
     <div className="time-slot-grid day-view">
       {timeSlots.map((timeSlot) => {
         const appointment = appointmentsForDay.find((app) => app.time === timeSlot);
-
         return (
           <div
             key={timeSlot}
@@ -87,13 +81,11 @@ const renderDayView = (appointments, selectedDate, onSlotClick, onMoveAppointmen
   );
 };
 
-// Week view rendering
+// Week view
 const renderWeekView = (appointments, selectedDate, onSlotClick, onMoveAppointment) => {
-  // Get the start of the week (Sunday)
   const startOfWeek = new Date(selectedDate);
   startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
 
-  // Generate days of the week
   const weekDays = [];
   for (let i = 0; i < 7; i++) {
     const day = new Date(startOfWeek);
@@ -101,7 +93,6 @@ const renderWeekView = (appointments, selectedDate, onSlotClick, onMoveAppointme
     weekDays.push(day);
   }
 
-  // Generate time slots: every hour
   const timeSlots = [];
   for (let hour = 0; hour <= 23; hour++) {
     const hh = hour.toString().padStart(2, "0");
@@ -133,20 +124,16 @@ const renderWeekView = (appointments, selectedDate, onSlotClick, onMoveAppointme
         {timeSlots.map((timeSlot) => (
           <div key={timeSlot} className="week-row">
             <div className="time-label">{timeSlot}</div>
-
             {weekDays.map((day, index) => {
               const dateString = day.toISOString().split("T")[0];
-              const appointment = appointments.find((app) => app.date === dateString && app.time === timeSlot);
+              const appointment = appointments.find((a) => a.date === dateString && a.time === timeSlot);
 
               return (
                 <div
                   key={index}
                   className={`week-cell ${appointment ? `appointment-${(appointment.type || "other").toLowerCase()}` : ""}`}
                   onClick={() => onSlotClick(timeSlot, appointment)}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    addDragOverClass(e.currentTarget);
-                  }}
+                  onDragOver={(e) => { e.preventDefault(); addDragOverClass(e.currentTarget); }}
                   onDragLeave={(e) => removeDragOverClass(e.currentTarget)}
                   onDrop={(e) => handleDrop(e, dateString, timeSlot)}
                 >
@@ -169,45 +156,30 @@ const renderWeekView = (appointments, selectedDate, onSlotClick, onMoveAppointme
   );
 };
 
-// Month view rendering
+// Month view
 const renderMonthView = (appointments, selectedDate, onSlotClick, onMoveAppointment) => {
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth();
-
-  // First day of current month
   const firstDay = new Date(year, month, 1);
-  // Last day of current month
   const lastDay = new Date(year, month + 1, 0);
-  const firstDayOfWeek = firstDay.getDay(); // 0 = Sunday
+  const firstDayOfWeek = firstDay.getDay();
+  const totalDays = 35;
 
-  const totalDays = 35; // 6 rows * 7 days
   const calendarDays = [];
 
-  // Days from previous month
   const prevMonthLastDate = new Date(year, month, 0).getDate();
   for (let i = 0; i < firstDayOfWeek; i++) {
     const dayNum = prevMonthLastDate - firstDayOfWeek + i + 1;
-    calendarDays.push({
-      date: new Date(year, month - 1, dayNum),
-      isCurrentMonth: false,
-    });
+    calendarDays.push({ date: new Date(year, month - 1, dayNum), isCurrentMonth: false });
   }
 
-  // Days of current month
   for (let i = 1; i <= lastDay.getDate(); i++) {
-    calendarDays.push({
-      date: new Date(year, month, i),
-      isCurrentMonth: true,
-    });
+    calendarDays.push({ date: new Date(year, month, i), isCurrentMonth: true });
   }
 
-  // Days of next month to fill grid
   const remainingDays = totalDays - calendarDays.length;
   for (let i = 1; i <= remainingDays; i++) {
-    calendarDays.push({
-      date: new Date(year, month + 1, i),
-      isCurrentMonth: false,
-    });
+    calendarDays.push({ date: new Date(year, month + 1, i), isCurrentMonth: false });
   }
 
   const weekDayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -218,21 +190,15 @@ const renderMonthView = (appointments, selectedDate, onSlotClick, onMoveAppointm
     const appointmentId = e.dataTransfer.getData("appointmentId");
     if (!appointmentId || !onMoveAppointment) return;
 
-    // Try to preserve original appointment time if we can find it
     const appt = appointments.find((a) => String(a.id) === String(appointmentId));
-    const timeToUse = appt ? appt.time : "09:00"; // fallback time if unknown
-
+    const timeToUse = appt ? appt.time : "09:00"; // fallback time
     onMoveAppointment(appointmentId, dateString, timeToUse);
   };
 
   return (
     <div className="time-slot-grid month-view">
       <div className="month-header">
-        {weekDayNames.map((wd, idx) => (
-          <div key={idx} className="weekday-header">
-            {wd}
-          </div>
-        ))}
+        {weekDayNames.map((wd, idx) => <div key={idx} className="weekday-header">{wd}</div>)}
       </div>
 
       <div className="month-grid">
@@ -245,10 +211,7 @@ const renderMonthView = (appointments, selectedDate, onSlotClick, onMoveAppointm
               key={index}
               className={`month-cell ${!dayObj.isCurrentMonth ? "other-month" : ""}`}
               onClick={() => onSlotClick(null, null)}
-              onDragOver={(e) => {
-                e.preventDefault();
-                addDragOverClass(e.currentTarget);
-              }}
+              onDragOver={(e) => { e.preventDefault(); addDragOverClass(e.currentTarget); }}
               onDragLeave={(e) => removeDragOverClass(e.currentTarget)}
               onDrop={(e) => handleDropOnMonthCell(e, dateString)}
             >
@@ -259,10 +222,7 @@ const renderMonthView = (appointments, selectedDate, onSlotClick, onMoveAppointm
                   <div
                     key={appIndex}
                     className={`month-appointment appointment-${(appointment.type || "other").toLowerCase()}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSlotClick(appointment.time, appointment);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); onSlotClick(appointment.time, appointment); }}
                     draggable
                     onDragStart={(e) => e.dataTransfer.setData("appointmentId", appointment.id)}
                   >
@@ -279,14 +239,8 @@ const renderMonthView = (appointments, selectedDate, onSlotClick, onMoveAppointm
   );
 };
 
-// helper DOM class toggles for drag feedback
-function addDragOverClass(el) {
-  if (!el) return;
-  el.classList.add("drag-over");
-}
-function removeDragOverClass(el) {
-  if (!el) return;
-  el.classList.remove("drag-over");
-}
+// Drag feedback
+function addDragOverClass(el) { if (!el) return; el.classList.add("drag-over"); }
+function removeDragOverClass(el) { if (!el) return; el.classList.remove("drag-over"); }
 
 export default TimeSlotGrid;

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from 'react-toastify';
 
 // Create Axios instance
 const api = axios.create({
@@ -22,6 +23,7 @@ api.interceptors.request.use(
 );
 
 // Helper: make API requests safely
+// Helper: make API requests safely
 const handleRequest = async (request) => {
   try {
     const response = await request();
@@ -31,16 +33,24 @@ const handleRequest = async (request) => {
 
     if (error.response) {
       // Backend responded with error status
-      throw new Error(error.response.data?.message || error.response.statusText);
+      // Read multiple possible keys for error messages
+      const message =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        error.response.statusText ||
+        "An error occurred";
+      // Include status code in error object for frontend checks
+      const err = new Error(message);
+      err.status = error.response.status;
+      throw err;
     } else if (error.request) {
-      // Request sent but no response received
       throw new Error("No response from server. Check backend or CORS.");
     } else {
-      // Other errors
       throw new Error(error.message);
     }
   }
 };
+
 
 // ------------------ Auth APIs ------------------
 export const loginUser = async ({ username, password }) =>

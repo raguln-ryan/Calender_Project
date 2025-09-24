@@ -3,6 +3,7 @@ import { AppointmentProvider } from "./context/AppointmentContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import CalendarPage from "./pages/CalendarPage";
 import "./App.css";
+ import { ToastContainer } from 'react-toastify';
 
 function AppContent() {
   const { dark, toggle } = useTheme();
@@ -36,6 +37,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AppContent />
+      <ToastContainer />
     </ThemeProvider>
   );
 }
