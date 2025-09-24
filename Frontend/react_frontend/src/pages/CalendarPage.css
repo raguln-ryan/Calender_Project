@@ -5,14 +5,15 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f9f9f9;
+  background: #f4f6f9;
   color: #333;
+  font-family: "Inter", "Segoe UI", sans-serif;
   transition: background 0.3s, color 0.3s;
 }
 
 .calendar-container.dark-mode {
-  background: #1e1e1e;
-  color: #f1f1f1;
+  background: #121212;
+  color: #e0e0e0;
 }
 
 /* =========================
@@ -23,33 +24,35 @@
   height: 100%;
   width: 100%;
   transition: all 0.3s ease-in-out;
+  overflow: hidden;
 }
 
-/* Sidebar (Upcoming Appointments) */
+/* Sidebar */
 .upcoming-sidebar {
   width: 0;
   overflow: hidden;
   background: #fff;
-  border-right: 1px solid #ddd;
+  border-right: 1px solid #e0e0e0;
   transition: width 0.4s ease-in-out, padding 0.3s ease-in-out;
 }
 
 .upcoming-sidebar.open {
-  width: 320px;
-  padding: 15px;
+  width: auto;
+  padding: 20px;
   overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
 }
 
 .dark-mode .upcoming-sidebar {
-  background: #2a2a2a;
-  border-color: #444;
+  background: #1e1e1e;
+  border-color: #333;
 }
 
 .upcoming-sidebar {
   z-index: 1000;
 }
 
-/* Main calendar content */
+/* Main calendar */
 .calendar-main {
   flex: 1;
   display: flex;
@@ -65,12 +68,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: #3f51b5;
+  padding: 18px 24px; /* expanded height */
+  background: linear-gradient(90deg, #3f51b5, #5c6bc0);
   color: white;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 20;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
 }
 
 /* Toggle upcoming sidebar button */
@@ -78,26 +88,22 @@
   background: #4caf50;
   color: #fff;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 8px 14px;
+  border-radius: 6px;
   cursor: pointer;
   margin-right: 12px;
   transition: background 0.2s;
+  font-weight: 500;
 }
 
 .toggle-upcoming-btn:hover {
   background: #43a047;
 }
 
-/* Center (title + navigation) */
+/* Center */
 .center-section {
   flex: 1;
   text-align: center;
-}
-
-.center-section h1 {
-  margin: 0;
-  font-size: 20px;
 }
 
 .date-navigation {
@@ -109,42 +115,47 @@
 }
 
 .date-navigation button {
-  padding: 5px 10px;
+  padding: 6px 12px;
   font-size: 14px;
   background: white;
   color: #3f51b5;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .date-navigation button:hover {
   background: #f1f1f1;
 }
 
-/* Right (controls) */
+/* Right */
 .right-section {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 /* Add Appointment button */
 .add-appointment-btn {
   background: #4caf50;
   color: white;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background 0.2s, transform 0.1s;
 }
 
 .add-appointment-btn:hover {
   background: #388e3c;
+  transform: translateY(-1px);
 }
 
 .plus-icon {
@@ -159,9 +170,10 @@
 }
 
 .upcoming-appointments h3 {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
+  color: #3f51b5;
 }
 
 .upcoming-appointments ul {
@@ -171,21 +183,24 @@
 }
 
 .upcoming-appointments li {
-  margin-bottom: 10px;
-  padding: 8px;
-  background: #2196f3; /* ✅ blue for mobile too */
-  color: white;
-  border-left: 4px solid #1565c0;
-  border-radius: 6px;
+  margin-bottom: 14px;
+  padding: 12px;
+  background: #ffffff;
+  border-left: 5px solid #3f51b5;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  color: #333;
+  transition: transform 0.2s;
 }
 
 .upcoming-appointments li:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px);
 }
 
 .dark-mode .upcoming-appointments li {
-  background: #1565c0;
+  background: #2a2a2a;
   border-left-color: #64b5f6;
+  color: #e0e0e0;
 }
 
 /* =========================
@@ -195,21 +210,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 14px 20px;
   background: #fafafa;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
 }
 
 .dark-mode .calendar-controls {
-  background: #2a2a2a;
-  border-color: #444;
+  background: #1e1e1e;
+  border-color: #333;
 }
 
 .date-selector input {
-  padding: 6px 10px;
+  padding: 6px 12px;
   font-size: 14px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 /* =========================
@@ -217,45 +232,47 @@
 ========================= */
 .calendar-grid td,
 .calendar-grid .calendar-cell {
-  border: 1px solid #ddd;
-  padding: 8px;
+  border: 1px solid #eee;
+  padding: 12px;
   text-align: center;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff;
   transition: background 0.2s, transform 0.2s;
-  word-wrap: break-word; /* ✅ prevent overflow */
+  word-wrap: break-word;
+  cursor: pointer;
 }
 
 .calendar-grid td:hover,
 .calendar-grid .calendar-cell:hover {
-  background: #f1f1f1;
+  background: #f9f9f9;
   transform: scale(1.02);
 }
 
 .dark-mode .calendar-grid td,
 .dark-mode .calendar-grid .calendar-cell {
   background: #2a2a2a;
-  border-color: #444;
+  border-color: #333;
 }
 
 /* =========================
    CALENDAR GRID APPOINTMENTS
 ========================= */
 .appointment {
-  background: #2196f3 !important;
+  background: #3f51b5 !important;
   color: white !important;
   padding: 6px 4px;
-  border-radius: 6px;
-  font-size: 12px;
+  border-radius: 8px;
+  font-size: 13px;
   text-align: center;
   cursor: pointer;
   display: block;
-  width: 100%; /* ✅ make full cell width */
+  width: 100%;
   box-sizing: border-box;
+  transition: background 0.2s;
 }
 
 .appointment:hover {
-  background: #1976d2 !important;
+  background: #2c3e91 !important;
 }
 
 .dark-mode .appointment {
@@ -274,34 +291,30 @@
   .upcoming-sidebar {
     position: fixed;
     top: 0;
-    left: -260px;
-    width: 250px;
+    left: -280px;
+    width: 100px;
     height: 100%;
-    background: #2196f3; /* ✅ sidebar matches appointment color */
+    background: #3f51b5;
     color: white;
     transition: left 0.3s ease-in-out;
     z-index: 1000;
-    padding: 15px;
+    padding: 20px;
   }
 
   .upcoming-sidebar.open {
     left: 0;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
-  }
-
-  .calendar-main {
-    width: 100%;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
   }
 
   .calendar-controls {
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
+    gap: 8px;
   }
 
   .calendar-grid td,
   .calendar-grid .calendar-cell {
-    padding: 6px;
+    padding: 8px;
     font-size: 12px;
   }
 
@@ -309,4 +322,51 @@
     font-size: 11px;
     padding: 4px 2px;
   }
+}
+/* ==============================
+   Logout Button
+   ============================== */
+.logout-btn {
+  background-color: #f44336; /* red for logout */
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background 0.3s, transform 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.logout-btn:hover {
+  background-color: #d32f2f;
+  transform: translateY(-1px);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+.logout-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.5);
+}
+
+/* Optional: icon styling if you add one inside the button */
+.logout-btn .icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Dark mode adjustments */
+.dark-mode .logout-btn {
+  background-color: #e57373;
+  color: #121212;
+}
+
+.dark-mode .logout-btn:hover {
+  background-color: #ef5350;
 }

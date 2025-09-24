@@ -16,9 +16,8 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     try {
       setLoading(true);
       const data = await getUpcomingAppointments(30); // next 30 days
-      // Only show appointments that are not completed AND future
+      const now = new Date();
       const upcoming = (data || []).filter((a) => {
-        const now = new Date();
         const endTime = new Date(a.endTime);
         return !a.completed && endTime >= now;
       });
@@ -58,7 +57,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     }
   };
 
-  // Filter appointments by search and date
+  // Filter appointments
   const filteredAppointments = appointments.filter((a) => {
     const title = a?.title?.toLowerCase() || "";
     const type = a?.type?.toLowerCase() || "";
@@ -79,22 +78,17 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     );
   });
 
-  // Detect tablet device
   const isTablet = windowWidth >= 768 && windowWidth <= 1280;
-
-  // Disable past dates for the date picker
   const todayStr = new Date().toISOString().split("T")[0];
 
   return (
     <>
-      {/* Hamburger button */}
       {!isOpen && (
         <button className="hamburger-btn" onClick={() => setIsOpen(true)}>
           ☰
         </button>
       )}
 
-      {/* Show Upcoming Appointments button for tablets */}
       {isTablet && !isOpen && (
         <button
           className="show-appointments-btn"
@@ -104,24 +98,27 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
         </button>
       )}
 
-      {/* Overlay */}
-      {isOpen && <div className="overlay show" onClick={() => setIsOpen(false)} />}
+      {isOpen && (
+        <div className="overlay show" onClick={() => setIsOpen(false)} />
+      )}
 
-      {/* Sidebar */}
       <div className={`upcoming-appointments ${isOpen ? "open" : ""}`}>
         <h3 className="section-title">📅 Upcoming Appointments</h3>
 
-        {/* Search + Date Picker */}
-        <div className="search-container">
+        {/* Sticky Header */}
+        <div className="search-container sticky-header">
           <div className="date-picker-input">
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              min={todayStr} // Disable past/completed days
+              min={todayStr}
             />
             {selectedDate && (
-              <button className="clear-date-btn" onClick={() => setSelectedDate("")}>
+              <button
+                className="clear-date-btn"
+                onClick={() => setSelectedDate("")}
+              >
                 ✖
               </button>
             )}
@@ -136,8 +133,8 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
           />
         </div>
 
-        {/* Appointments Scroll List */}
-        <div className="appointments-scroll">
+        {/* Scrollable list BELOW the sticky header */}
+        <div className="appointments-scroll with-header">
           {loading ? (
             <p>Loading...</p>
           ) : error ? (
@@ -167,10 +164,16 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
                   </div>
 
                   <div className="actions below">
-                    <button className="edit-btn" onClick={() => onEdit && onEdit(a)}>
+                    <button
+                      className="edit-btn"
+                      onClick={() => onEdit && onEdit(a)}
+                    >
                       ✏️ Edit
                     </button>
-                    <button className="delete-btn" onClick={() => handleDelete(a.id)}>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDelete(a.id)}
+                    >
                       🗑️ Delete
                     </button>
                   </div>

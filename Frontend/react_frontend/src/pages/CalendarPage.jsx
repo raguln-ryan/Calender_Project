@@ -21,35 +21,25 @@ const CalendarPage = ({ setIsAuthenticated }) => {
   const [calendarView, setCalendarView] = useState("day");
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [showUpcoming, setShowUpcoming] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
 
   const navigate = useNavigate();
   const isMobile = screenWidth < 600;
   const isTablet = screenWidth >= 600 && screenWidth < 1024;
 
-  // =========================
   // Logout
-  // =========================
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
     navigate("/", { replace: true });
   };
 
-  // =========================
   // Fetch Appointments
-  // =========================
   const fetchAppointments = async () => {
     try {
       setLoading(true);
       const data = await getUpcomingAppointments(30);
-      const filtered = data.filter(
-        (a) =>
-          moment(a.startTime).isSame(selectedDate, "day") ||
-          moment(a.endTime).isSame(selectedDate, "day")
-      );
-      setAppointments(filtered);
+      setAppointments(data);
     } catch (error) {
       console.error("Error fetching appointments:", error);
     } finally {
@@ -69,20 +59,16 @@ const CalendarPage = ({ setIsAuthenticated }) => {
   useEffect(() => {
     fetchAppointments();
     fetchUpcomingAppointments();
-  }, [selectedDate]);
+  }, []);
 
-  // =========================
   // Resize listener
-  // =========================
   useEffect(() => {
     const handleResize = () => setScreenWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // =========================
   // Popup auto-hide
-  // =========================
   useEffect(() => {
     if (popupMessage) {
       const timer = setTimeout(() => setPopupMessage(""), 3000);
@@ -90,9 +76,7 @@ const CalendarPage = ({ setIsAuthenticated }) => {
     }
   }, [popupMessage]);
 
-  // =========================
   // Keyboard Shortcuts
-  // =========================
   useEffect(() => {
     const handleKeyDown = (e) => {
       const key = e.key.toLowerCase();
@@ -141,16 +125,35 @@ const CalendarPage = ({ setIsAuthenticated }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showModal]);
 
-  // =========================
-  // Calendar Navigation Functions
-  // =========================
-  const goToPreviousDay = () =>
-    setSelectedDate((prev) => moment(prev).subtract(1, "day").toDate());
+  const getFilteredAppointments = () => {
+    if (!appointments.length) return [];
 
-  const goToNextDay = () =>
-    setSelectedDate((prev) => moment(prev).add(1, "day").toDate());
+    if (calendarView === "day") {
+      return appointments.filter(
+        (a) =>
+          moment(a.startTime).isSame(selectedDate, "day") ||
+          moment(a.endTime).isSame(selectedDate, "day")
+      );
+    }
 
-  const goToToday = () => setSelectedDate(new Date());
+    if (calendarView === "week") {
+      const startOfWeek = moment(selectedDate).startOf("week");
+      const endOfWeek = moment(selectedDate).endOf("week");
+      return appointments.filter((a) =>
+        moment(a.startTime).isBetween(startOfWeek, endOfWeek, null, "[]")
+      );
+    }
+
+    if (calendarView === "month") {
+      const startOfMonth = moment(selectedDate).startOf("month");
+      const endOfMonth = moment(selectedDate).endOf("month");
+      return appointments.filter((a) =>
+        moment(a.startTime).isBetween(startOfMonth, endOfMonth, null, "[]")
+      );
+    }
+
+    return appointments;
+  };
 
   const handleSlotClick = (timeSlot, appointment) => {
     if (appointment) setSelectedAppointment(appointment);
@@ -184,12 +187,6 @@ const CalendarPage = ({ setIsAuthenticated }) => {
     setSelectedTimeSlot(null);
     setShowModal(true);
   };
-
-  const filteredAppointments = appointments.filter(
-    (a) =>
-      a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handleMoveAppointment = async (appointmentId, newDate, newTime) => {
     try {
@@ -226,9 +223,6 @@ const CalendarPage = ({ setIsAuthenticated }) => {
     }
   };
 
-  // =========================
-  // Render
-  // =========================
   return (
     <div className={`calendar-container ${darkMode ? "dark-mode" : ""}`}>
       {popupMessage && (
@@ -241,9 +235,8 @@ const CalendarPage = ({ setIsAuthenticated }) => {
       )}
 
       <div
-        className={`calendar-layout ${
-          isMobile ? "mobile" : isTablet ? "tablet" : "desktop"
-        }`}
+        className={`calendar-layout ${isMobile ? "mobile" : isTablet ? "tablet" : "desktop"
+          }`}
       >
         {isMobile && showUpcoming && (
           <div className="overlay" onClick={() => setShowUpcoming(false)}></div>
@@ -285,23 +278,28 @@ const CalendarPage = ({ setIsAuthenticated }) => {
             <div className="center-section">
               <h1>Appointment Calendar</h1>
               <div className="date-navigation">
-                <button onClick={goToPreviousDay}>&lt;</button>
+                <button onClick={() => setSelectedDate(moment(selectedDate).subtract(1, "day").toDate())}>
+                  &lt;
+                </button>
                 <span>{moment(selectedDate).format("YYYY-MM-DD")}</span>
-                <button onClick={goToNextDay}>&gt;</button>
-                <button onClick={goToToday} style={{ marginLeft: "10px" }}>
+                <button onClick={() => setSelectedDate(moment(selectedDate).add(1, "day").toDate())}>
+                  &gt;
+                </button>
+                <button onClick={() => setSelectedDate(new Date())} style={{ marginLeft: "10px" }}>
                   Today
                 </button>
               </div>
             </div>
 
             <div className="right-section">
-              <ThemeToggle darkMode={darkMode} toggleDarkMode={() => {
-                setDarkMode(!darkMode);
-                document.body.classList.toggle("dark-mode");
-              }} />
-              <button className="logout-btn" onClick={handleLogout}>
-                Logout
-              </button>
+              <ThemeToggle
+                darkMode={darkMode}
+                toggleDarkMode={() => {
+                  setDarkMode(!darkMode);
+                  document.body.classList.toggle("dark-mode");
+                }}
+              />
+
               <button
                 className="add-appointment-btn"
                 onClick={() => {
@@ -312,6 +310,12 @@ const CalendarPage = ({ setIsAuthenticated }) => {
               >
                 <span className="plus-icon">+</span>
                 <span className="btn-text">Add Appointment</span>
+              </button>
+
+              {/* Logout Button with Lock Icon */}
+              <button className="logout-btn" onClick={handleLogout}>
+                <span className="logout-icon" style={{ fontSize: "18px", marginRight: "4px" }}>🔒</span>
+                <span className="btn-text">Logout</span>
               </button>
             </div>
           </header>
@@ -336,7 +340,7 @@ const CalendarPage = ({ setIsAuthenticated }) => {
             </div>
           ) : (
             <TimeSlotGrid
-              appointments={filteredAppointments}
+              appointments={getFilteredAppointments()}
               selectedDate={selectedDate}
               onSlotClick={handleSlotClick}
               view={calendarView}
