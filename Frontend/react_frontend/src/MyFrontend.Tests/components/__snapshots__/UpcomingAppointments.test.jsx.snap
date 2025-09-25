@@ -49,3 +49,53 @@ exports[`UpcomingAppointments Component snapshot matches 1`] = `
   </div>
 </div>
 `;
+
+exports[`UpcomingAppointments Full Coverage snapshot test 1`] = `
+<div>
+  <button
+    class="hamburger-btn"
+  >
+    ☰
+  </button>
+  <button
+    class="show-appointments-btn"
+  >
+    Show Upcoming Appointments
+  </button>
+  <div
+    class="upcoming-appointments "
+  >
+    <h3
+      class="section-title"
+    >
+      📅 Upcoming Appointments
+    </h3>
+    <div
+      class="search-container sticky-header"
+    >
+      <div
+        class="date-picker-input"
+      >
+        <input
+          min="2025-09-25"
+          type="date"
+          value=""
+        />
+      </div>
+      <input
+        class="search-input"
+        placeholder="Search appointments..."
+        type="text"
+        value=""
+      />
+    </div>
+    <div
+      class="appointments-scroll with-header"
+    >
+      <p>
+        Loading...
+      </p>
+    </div>
+  </div>
+</div>
+`;

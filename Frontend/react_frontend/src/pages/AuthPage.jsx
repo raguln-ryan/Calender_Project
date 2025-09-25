@@ -30,7 +30,7 @@ const AuthPage = ({ setIsAuthenticated }) => {
 
         localStorage.setItem("token", data.token);
         setIsAuthenticated(true);
-        navigate("/calendar", { replace: true }); // 🔑 no back button to login
+        navigate("/calendar", { replace: true });
       } else {
         await registerUser(formData);
         alert("✅ Registration successful! You can login now.");
@@ -46,45 +46,61 @@ const AuthPage = ({ setIsAuthenticated }) => {
 
   return (
     <div className="auth-container">
-      <div className="auth-card">
-        <h2>{isLogin ? "Login" : "Register"}</h2>
+      {/* Left panel: login/register form */}
+      <div className="auth-left">
+        <div className="auth-card">
+          <h2>{isLogin ? "Login" : "Register"}</h2>
 
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            disabled={loading}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            disabled={loading}
-          />
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
 
-          <button type="submit" disabled={loading}>
-            {loading ? "Please wait..." : isLogin ? "Login" : "Register"}
-          </button>
-        </form>
+            <button type="submit" disabled={loading}>
+              {loading ? "Please wait..." : isLogin ? "Login" : "Register"}
+            </button>
+          </form>
 
-        {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text">{error}</p>}
 
-        <p
-          onClick={() => setIsLogin(!isLogin)}
-          className="toggle-link"
-          style={{ cursor: "pointer" }}
-        >
-          {isLogin
-            ? "Don't have an account? Register"
-            : "Already have an account? Login"}
-        </p>
+          <p
+            onClick={() => setIsLogin(!isLogin)}
+            className="toggle-link"
+          >
+            {isLogin
+              ? "Don't have an account? Register"
+              : "Already have an account? Login"}
+          </p>
+        </div>
+      </div>
+
+      {/* Right panel: illustration / marketing area */}
+      <div className="auth-right">
+        <div>
+          <h1>Welcome to Appointment Planner!</h1>
+
+          <h2>Do Register and Enjoy the Features!</h2>
+          <p>
+            Seamlessly manage your appointments and tasks in one intuitive dashboard.
+            Stay organized, save time, and boost productivity with smart scheduling.
+            Experience a modern, effortless way to plan your day.
+          </p>
+        </div>
       </div>
     </div>
   );

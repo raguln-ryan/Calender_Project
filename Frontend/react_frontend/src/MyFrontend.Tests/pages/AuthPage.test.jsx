@@ -14,13 +14,14 @@ jest.mock("react-router-dom", () => ({
 
 jest.mock("../../services/api");
 
-describe("AuthPage Component", () => {
+describe("AuthPage Component - Full Coverage", () => {
   const setIsAuthenticated = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
+  // ---------------- Render & toggle ----------------
   test("renders login form by default", () => {
     render(
       <MemoryRouter>
@@ -42,6 +43,7 @@ describe("AuthPage Component", () => {
     expect(screen.getByText("Register")).toBeInTheDocument();
   });
 
+  // ---------------- Login success/failure ----------------
   test("login form submits successfully", async () => {
     apiService.loginUser.mockResolvedValue({ token: "123abc" });
 
@@ -61,31 +63,6 @@ describe("AuthPage Component", () => {
       expect(localStorage.getItem("token")).toBe("123abc");
       expect(setIsAuthenticated).toHaveBeenCalledWith(true);
       expect(mockedNavigate).toHaveBeenCalledWith("/calendar", { replace: true });
-    });
-  });
-
-  test("register form submits successfully", async () => {
-    apiService.registerUser.mockResolvedValue({ message: "Registered" });
-
-    render(
-      <MemoryRouter>
-        <AuthPage setIsAuthenticated={setIsAuthenticated} />
-      </MemoryRouter>
-    );
-
-    fireEvent.click(screen.getByText("Don't have an account? Register"));
-
-    fireEvent.change(screen.getByPlaceholderText("Username"), { target: { value: "newuser" } });
-    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "newpass" } });
-
-    window.alert = jest.fn(); // mock alert
-
-    fireEvent.click(screen.getByRole("button", { name: /Register/i }));
-
-    await waitFor(() => {
-      expect(apiService.registerUser).toHaveBeenCalledWith({ username: "newuser", password: "newpass" });
-      expect(window.alert).toHaveBeenCalledWith("✅ Registration successful! You can login now.");
-      expect(screen.getByText("Login")).toBeInTheDocument(); // switched back to login
     });
   });
 
@@ -129,4 +106,67 @@ describe("AuthPage Component", () => {
 
     resolvePromise({ token: "123" });
   });
+
+  // ---------------- Register success/failure ----------------
+  test("register form submits successfully", async () => {
+    apiService.registerUser.mockResolvedValue({ message: "Registered" });
+    window.alert = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <AuthPage setIsAuthenticated={setIsAuthenticated} />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByText("Don't have an account? Register"));
+
+    fireEvent.change(screen.getByPlaceholderText("Username"), { target: { value: "newuser" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "newpass" } });
+
+    fireEvent.click(screen.getByRole("button", { name: /Register/i }));
+
+    await waitFor(() => {
+      expect(apiService.registerUser).toHaveBeenCalledWith({ username: "newuser", password: "newpass" });
+      expect(window.alert).toHaveBeenCalledWith("✅ Registration successful! You can login now.");
+      expect(screen.getByText("Login")).toBeInTheDocument();
+    });
+  });
+
+  test("register form shows error on failure", async () => {
+    apiService.registerUser.mockRejectedValue(new Error("Registration failed"));
+    window.alert = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <AuthPage setIsAuthenticated={setIsAuthenticated} />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByText("Don't have an account? Register"));
+
+    fireEvent.change(screen.getByPlaceholderText("Username"), { target: { value: "failuser" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "failpass" } });
+
+    fireEvent.click(screen.getByRole("button", { name: /Register/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Registration failed")).toBeInTheDocument();
+    });
+  });
+
+  test("register form shows error when inputs are empty", async () => {
+    render(
+      <MemoryRouter>
+        <AuthPage setIsAuthenticated={setIsAuthenticated} />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByText("Don't have an account? Register"));
+    fireEvent.click(screen.getByRole("button", { name: /Register/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Username and Password are required")).toBeInTheDocument();
+    });
+  });
+
 });

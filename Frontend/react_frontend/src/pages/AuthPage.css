@@ -1,26 +1,43 @@
 /* AuthPage.css */
 
+/* Container: split screen layout */
 .auth-container {
+  display: flex;
+  min-height: 100vh; /* full viewport height */
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Left panel: login form */
+.auth-left {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background: #f0f4f8;
-  font-family: Arial, sans-serif;
+  background-color: #f0f4f8;
+  padding: 50px;
 }
 
 .auth-card {
   background: #ffffff;
-  padding: 40px 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  width: 350px;
+  padding: 50px 40px;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 400px; /* ensures proper desktop fit */
   text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
 }
 
 .auth-card h2 {
-  margin-bottom: 25px;
-  color: #333333;
+  margin-bottom: 30px;
+  color: #222222;
+  font-size: 28px;
+  font-weight: 600;
 }
 
 .auth-card form {
@@ -29,47 +46,129 @@
 }
 
 .auth-card input {
-  padding: 12px 15px;
-  margin-bottom: 15px;
-  border-radius: 5px;
+  padding: 15px 18px;
+  margin-bottom: 20px;
+  border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 14px;
+  font-size: 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .auth-card input:focus {
   border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
   outline: none;
 }
 
 .auth-card button {
-  padding: 12px;
+  padding: 15px;
   background-color: #007bff;
-  color: white;
-  font-size: 16px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 500;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   margin-top: 10px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .auth-card button:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
 .toggle-link {
-  margin-top: 15px;
+  margin-top: 20px;
   color: #007bff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
+  transition: color 0.3s ease;
 }
 
 .toggle-link:hover {
   text-decoration: underline;
+  color: #0056b3;
 }
 
 .error-text {
-  color: red;
-  margin-top: 10px;
-  font-size: 13px;
+  color: #ff4d4f;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Right panel: illustration / marketing area */
+.auth-right {
+  flex: 1;
+  background: linear-gradient(135deg, #1c4168, #00bfff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 50px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Example decorative shapes or text */
+.auth-right::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  top: -50px;
+  right: -50px;
+}
+
+.auth-right h1 {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.auth-right p {
+  font-size: 18px;
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .auth-container {
+    flex-direction: column;
+  }
+
+  .auth-left, .auth-right {
+    flex: none;
+    width: 100%;
+    min-height: 50vh;
+    padding: 30px;
+  }
+
+  .auth-right h1 {
+    font-size: 36px;
+  }
+
+  .auth-right p {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 500px) {
+  .auth-card {
+    width: 90%;
+    padding: 40px 25px;
+  }
+
+  .auth-card h2 {
+    font-size: 24px;
+  }
+
+  .auth-card input, .auth-card button {
+    font-size: 15px;
+    padding: 12px;
+  }
 }
