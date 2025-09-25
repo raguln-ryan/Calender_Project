@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import AuthPage from "./pages/AuthPage";
 import CalendarPage from "./pages/CalendarPage";
  import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Don't 
+import 'react-toastify/dist/ReactToastify.css'; 
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

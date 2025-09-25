@@ -1,8 +1,7 @@
 using Backend.BusinessLayer;
 using Backend.DTOs;
-using Backend.Models; // Assuming you have a User model
+using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
-// using Backend.BusinessLayer;
 
 namespace Backend.Controllers
 {
@@ -10,10 +9,10 @@ namespace Backend.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly JwtService _jwtService;
+        private readonly IJwtService _jwtService;
         private readonly IUserBL _userBL;
 
-        public UsersController(IUserBL userBL, JwtService jwtService)
+        public UsersController(IUserBL userBL, IJwtService jwtService)
         {
             _userBL = userBL;
             _jwtService = jwtService;

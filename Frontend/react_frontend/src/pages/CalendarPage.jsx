@@ -61,7 +61,7 @@ const CalendarPage = ({ setIsAuthenticated }) => {
   useEffect(() => {
     fetchAppointments();
     fetchUpcomingAppointments();
-  }, []);
+  }, [selectedDate]);
 
   // Resize listener
   useEffect(() => {

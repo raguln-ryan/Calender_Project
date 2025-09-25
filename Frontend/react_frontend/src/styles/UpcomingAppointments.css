@@ -69,7 +69,7 @@
 
 /* Scrollable appointment list inside sidebar */
 .appointments-scroll {
-  flex: 1; /* fill remaining space below header */
+  flex: 10; /* fill remaining space below header */
   overflow-y: auto;
   scroll-behavior: smooth;
 }
@@ -105,6 +105,7 @@
 .appointment-info {
   margin-bottom: 10px;
   word-wrap: break-word;
+  justify-items: center;
 }
 
 .type-badge {

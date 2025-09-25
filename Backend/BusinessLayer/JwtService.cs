@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Backend.BusinessLayer
 {
-    public class JwtService
+    public class JwtService : IJwtService
     {
         private readonly string _secret;
         private readonly string _issuer;
@@ -35,7 +35,6 @@ namespace Backend.BusinessLayer
                 new Claim(ClaimTypes.NameIdentifier, userId),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

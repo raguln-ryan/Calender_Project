@@ -25,6 +25,8 @@ builder.Services.AddScoped<IUserBL, UserBL>();
 builder.Services.AddScoped<IAppointmentDAL, AppointmentDAL>();
 builder.Services.AddScoped<IAppointmentBL, AppointmentBL>();
 builder.Services.AddSingleton<JwtService>(); 
+builder.Services.AddScoped<IJwtService, JwtService>();
+
 
 // -----------------------
 // JWT Authentication

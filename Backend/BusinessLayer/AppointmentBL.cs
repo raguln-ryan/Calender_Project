@@ -4,6 +4,7 @@ using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Backend.BusinessLayer
@@ -27,8 +28,10 @@ namespace Backend.BusinessLayer
 
         public async Task<Appointment> CreateAppointmentAsync(CreateAppointmentDto dto, int userId)
         {
-            if (await HasConflictAsync(userId, dto.StartTime, dto.EndTime))
-                throw new System.Exception("Appointment conflicts with an existing appointment.");
+            // Run validations
+            var errors = await ValidateAppointmentAsync(dto.Title, dto.Description, dto.StartTime, dto.EndTime, userId);
+            if (errors.Count > 0)
+                throw new System.Exception(string.Join("; ", errors));
 
             var appointment = new Appointment
             {
@@ -52,10 +55,11 @@ namespace Backend.BusinessLayer
                                          .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
             if (existing == null)
                 return false;
-            // Check for conflicts excluding current appointment
-            if (await HasConflictAsync(userId, dto.StartTime, dto.EndTime, id))
-                throw new System.Exception("Updated appointment conflicts with an existing appointment.");
 
+            // Run validations (exclude current appointment for conflict check)
+            var errors = await ValidateAppointmentAsync(dto.Title, dto.Description, dto.StartTime, dto.EndTime, userId, id);
+            if (errors.Count > 0)
+                throw new System.Exception(string.Join("; ", errors));
 
             existing.Title = dto.Title;
             existing.Description = dto.Description;
@@ -84,7 +88,7 @@ namespace Backend.BusinessLayer
                                  .FirstOrDefaultAsync(u => u.Username == username);
         }
 
-         public async Task<bool> HasConflictAsync(int userId, System.DateTime startTime, System.DateTime endTime, int? excludeAppointmentId = null)
+        public async Task<bool> HasConflictAsync(int userId, System.DateTime startTime, System.DateTime endTime, int? excludeAppointmentId = null)
         {
             var query = _context.Appointments
                                 .Where(a => a.UserId == userId &&
@@ -95,6 +99,41 @@ namespace Backend.BusinessLayer
                 query = query.Where(a => a.Id != excludeAppointmentId.Value);
 
             return await query.AnyAsync();
+        }
+
+        // ---------------------------
+        // Validator method
+        // ---------------------------
+        private async Task<List<string>> ValidateAppointmentAsync(string title, string? description, System.DateTime startTime, System.DateTime endTime, int userId, int? excludeAppointmentId = null)
+        {
+            var errors = new List<string>();
+
+            // Title validation
+            if (string.IsNullOrWhiteSpace(title))
+                errors.Add("Title is required.");
+            else if (title.Length > 30)
+                errors.Add("Title must be at most 30 characters.");
+            else if (!Regex.IsMatch(title, @"^[a-zA-Z\s]+$"))
+                errors.Add("Title must contain only letters and spaces.");
+
+            // Description validation
+            if (!string.IsNullOrEmpty(description))
+            {
+                if (description.Length > 50)
+                    errors.Add("Description must be at most 50 characters.");
+                else if (!Regex.IsMatch(description, @"^[a-zA-Z0-9\s]*$"))
+                    errors.Add("Description can contain only letters, numbers, and spaces.");
+            }
+
+            // Start/End time validation
+            if (endTime <= startTime)
+                errors.Add("EndTime must be after StartTime.");
+
+            // Conflict check
+            if (await HasConflictAsync(userId, startTime, endTime, excludeAppointmentId))
+                errors.Add("Appointment conflicts with an existing appointment.");
+
+            return errors;
         }
     }
 }

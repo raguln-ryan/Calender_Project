@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CalendarViewSelector Component matches snapshot 1`] = `
+<div>
+  <div
+    class="calendar-view-selector"
+  >
+    <button
+      class="view-btn active"
+    >
+      Day
+    </button>
+    <button
+      class="view-btn "
+    >
+      Week
+    </button>
+    <button
+      class="view-btn "
+    >
+      Month
+    </button>
+  </div>
+</div>
+`;

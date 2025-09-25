@@ -83,6 +83,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
 
   return (
     <>
+      {/* Hamburger button */}
       {!isOpen && (
         <button className="hamburger-btn" onClick={() => setIsOpen(true)}>
           ☰
@@ -98,10 +99,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
         </button>
       )}
 
-      {isOpen && (
-        <div className="overlay show" onClick={() => setIsOpen(false)} />
-      )}
-
+      {/* Sidebar */}
       <div className={`upcoming-appointments ${isOpen ? "open" : ""}`}>
         <h3 className="section-title">📅 Upcoming Appointments</h3>
 
@@ -133,7 +131,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
           />
         </div>
 
-        {/* Scrollable list BELOW the sticky header */}
+        {/* Scrollable list */}
         <div className="appointments-scroll with-header">
           {loading ? (
             <p>Loading...</p>
@@ -183,6 +181,11 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
           )}
         </div>
       </div>
+
+      {/* Overlay should come AFTER sidebar so it sits behind */}
+      {isOpen && (
+        <div className="overlay show" onClick={() => setIsOpen(false)} />
+      )}
     </>
   );
 };
