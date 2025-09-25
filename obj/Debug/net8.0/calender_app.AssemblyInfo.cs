@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("calender_app")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b11bc1bb4ab08b87b5b9d881496825975394d8bd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7d4d878f33b7f7e5c1863e2c92bc13e6a29a16a6")]
 [assembly: System.Reflection.AssemblyProductAttribute("calender_app")]
 [assembly: System.Reflection.AssemblyTitleAttribute("calender_app")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -11,16 +11,26 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
+  // Helper: normalize dates to local midnight
+  const normalizeDate = (d) => {
+    const nd = new Date(d);
+    nd.setHours(0, 0, 0, 0);
+    return nd.getTime();
+  };
+
   // Fetch upcoming appointments
   const fetchAppointments = async () => {
     try {
       setLoading(true);
       const data = await getUpcomingAppointments(30); // next 30 days
       const now = new Date();
+      now.setHours(0, 0, 0, 0); // start of today
+
       const upcoming = (data || []).filter((a) => {
-        const endTime = new Date(a.endTime);
-        return !a.completed && endTime >= now;
+        const startTime = new Date(a.startTime);
+        return !a.completed && startTime >= now;
       });
+
       setAppointments(upcoming);
       setLoading(false);
     } catch (err) {
@@ -57,8 +67,9 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
     }
   };
 
-  // Filter appointments
-  const filteredAppointments = appointments.filter((a) => {
+// Filter appointments
+const filteredAppointments = appointments
+  .filter((a) => {
     const title = a?.title?.toLowerCase() || "";
     const type = a?.type?.toLowerCase() || "";
     const matchesSearch =
@@ -72,11 +83,12 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
 
     return (
       matchesSearch &&
-      appointmentDate.getFullYear() === selected.getFullYear() &&
-      appointmentDate.getMonth() === selected.getMonth() &&
-      appointmentDate.getDate() === selected.getDate()
+      normalizeDate(appointmentDate) === normalizeDate(selected)
     );
-  });
+  })
+  // ✅ sort by date then by time
+  .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
 
   const isTablet = windowWidth >= 768 && windowWidth <= 1280;
   const todayStr = new Date().toISOString().split("T")[0];
@@ -182,7 +194,7 @@ const UpcomingAppointments = ({ refreshTrigger, onEdit, onDelete }) => {
         </div>
       </div>
 
-      {/* Overlay should come AFTER sidebar so it sits behind */}
+      {/* Overlay */}
       {isOpen && (
         <div className="overlay show" onClick={() => setIsOpen(false)} />
       )}

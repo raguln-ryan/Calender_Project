@@ -24,6 +24,8 @@
 
 .upcoming-appointments.open {
   left: 0;
+  width: 70;
+  height :auto;
 }
 
 /* Overlay */
@@ -66,11 +68,18 @@
   background: inherit; /* match sidebar background */
   padding: 10px 0;
 }
+/* Sidebar container should take full height of viewport */
+.upcoming-appointments {
+  display: flex;
+  flex-direction: column;
+  height: 300vh;   /* lock height to viewport */
+  overflow: hidden; /* prevent page scroll inside sidebar */
+}
 
 /* Scrollable appointment list inside sidebar */
 .appointments-scroll {
-  flex: 10; /* fill remaining space below header */
-  overflow-y: auto;
+  flex: 1;               /* take up all remaining space below header */
+  overflow-y: auto;      /* only this area scrolls */
   scroll-behavior: smooth;
 }
 
@@ -123,7 +132,7 @@
   gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 10px;
+  margin-top: px;
 }
 
 .edit-btn,
@@ -199,7 +208,7 @@
   }
 
   .upcoming-appointments {
-    width: 100%; /* Ensure full width on mobile */
+    width: 70%; /* Ensure full width on mobile */
     max-width: 100%; /* Override the general max-width for mobile */
     padding: 1rem;
   }
