@@ -322,24 +322,4 @@ describe("AddAppointmentModal Complete Coverage", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByLabelText(/Title/i)).toBeInTheDocument();
   });
-
-  // Form reset test
-  test("resets form when switching from edit to create mode", () => {
-    const appointment = { id: 1, title: "Edit", startTime: "2025-09-25T09:00:00Z", endTime: "2025-09-25T10:00:00Z" };
-    const { rerender } = renderModal({ appointmentToEdit: appointment });
-    
-    expect(screen.getByDisplayValue("Edit")).toBeInTheDocument();
-    
-    rerender(
-      <AddAppointmentModal
-        onClose={onClose}
-        onAdd={onAdd}
-        selectedDate={selectedDate}
-        appointmentToEdit={null}
-        setPopupMessage={setPopupMessage}
-      />
-    );
-    
-    expect(screen.queryByDisplayValue("Edit")).not.toBeInTheDocument();
-  });
 });

@@ -95,6 +95,7 @@ const AuthPage = ({ setIsAuthenticated }) => {
           <h1>Welcome to Appointment Planner!</h1>
 
           <h2>Do Register and Enjoy the Features!</h2>
+          
           <p>
             Seamlessly manage your appointments and tasks in one intuitive dashboard.
             Stay organized, save time, and boost productivity with smart scheduling.

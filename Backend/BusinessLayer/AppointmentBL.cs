@@ -26,6 +26,17 @@ namespace Backend.BusinessLayer
                                  .ToListAsync();
         }
 
+        public async Task<List<Appointment>> GetAppointmentsByDateRangeAsync(int userId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.Appointments
+                                 .AsNoTracking()
+                                 .Where(a => a.UserId == userId && 
+                                            a.StartTime >= startDate && 
+                                            a.StartTime <= endDate.AddDays(1)) // Add 1 day to include the entire end date
+                                 .OrderBy(a => a.StartTime)
+                                 .ToListAsync();
+        }
+
         public async Task<Appointment> CreateAppointmentAsync(CreateAppointmentDto dto, int userId)
         {
             // Run validations

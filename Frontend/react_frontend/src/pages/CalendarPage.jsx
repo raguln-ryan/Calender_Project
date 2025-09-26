@@ -8,8 +8,8 @@ import ThemeToggle from "../components/ThemeToggle";
 import CalendarViewSelector from "../components/CalendarViewSelector";
 import "./CalendarPage.css";
 import moment from "moment";
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const CalendarPage = ({ setIsAuthenticated }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -28,6 +28,8 @@ const CalendarPage = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
   const isMobile = screenWidth < 600;
   const isTablet = screenWidth >= 600 && screenWidth < 1024;
+// 
+  // console.log(selectedDate)
 
   // Logout
   const handleLogout = () => {
@@ -40,7 +42,7 @@ const CalendarPage = ({ setIsAuthenticated }) => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const data = await getUpcomingAppointments(30);
+      const data = await getUpcomingAppointments(0, selectedDate, selectedDate);
       setAppointments(data);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -60,7 +62,7 @@ const CalendarPage = ({ setIsAuthenticated }) => {
 
   useEffect(() => {
     fetchAppointments();
-    fetchUpcomingAppointments();
+    // fetchUpcomingAppointments();
   }, [selectedDate]);
 
   // Resize listener
@@ -195,62 +197,78 @@ const CalendarPage = ({ setIsAuthenticated }) => {
 
   // ✅ Updated: Move appointment with conflict handling
   const handleMoveAppointment = async (appointmentId, newDate, newTime) => {
-  try {
-    const appointmentIndex = appointments.findIndex((a) => a.id === parseInt(appointmentId));
-    if (appointmentIndex === -1) return;
+    try {
+      const appointmentIndex = appointments.findIndex((a) => a.id === parseInt(appointmentId));
+      if (appointmentIndex === -1) return;
 
-    const appointment = appointments[appointmentIndex];
-    const duration = new Date(appointment.endTime) - new Date(appointment.startTime);
-    const [hours, minutes] = newTime.split(":");
-    const newStart = new Date(newDate);
-    newStart.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-    const newEnd = new Date(newStart.getTime() + duration);
+      const appointment = appointments[appointmentIndex];
+      const duration = new Date(appointment.endTime) - new Date(appointment.startTime);
+      const [hours, minutes] = newTime.split(":");
+      const newStart = new Date(newDate);
+      newStart.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      const newEnd = new Date(newStart.getTime() + duration);
 
-    const updatedAppointment = {
-      ...appointment,
-      startTime: newStart.toISOString(),
-      endTime: newEnd.toISOString(),
-    };
+      const updatedAppointment = {
+        ...appointment,
+        startTime: newStart.toISOString(),
+        endTime: newEnd.toISOString(),
+      };
 
-    await updateAppointment(appointment.id, updatedAppointment);
+      await updateAppointment(appointment.id, updatedAppointment);
 
-    const newAppointments = [...appointments];
-    newAppointments[appointmentIndex] = updatedAppointment;
-    setAppointments(newAppointments);
+      const newAppointments = [...appointments];
+      newAppointments[appointmentIndex] = updatedAppointment;
+      setAppointments(newAppointments);
 
-    fetchUpcomingAppointments();
-    toast.success("Appointment moved successfully!");
-  } catch (error) {
-    // ✅ Conflict handling
-    toast.error("Conflict! This time slot is already booked.");
-    if (error.status === 409 || error.message.toLowerCase().includes("conflict") || error.message.toLowerCase().includes("taken")) {
-      setPopupMessage("Conflict! This time slot is already booked.");
-    } else {
-      setPopupMessage("Failed to move appointment!");
+      fetchUpcomingAppointments();
+      toast.success("Appointment moved successfully!");
+    } catch (error) {
+      // ✅ Conflict handling
+      toast.error("Conflict! This time slot is already booked.");
+      if (
+        error.status === 409 ||
+        error.message.toLowerCase().includes("conflict") ||
+        error.message.toLowerCase().includes("taken")
+      ) {
+        setPopupMessage("Conflict! This time slot is already booked.");
+      } else {
+        setPopupMessage("Failed to move appointment!");
+      }
     }
-  }
-};
+  };
 
   return (
     <div className={`calendar-container ${darkMode ? "dark-mode" : ""}`}>
       {popupMessage && (
         <div className="popup-message">
           {popupMessage}
-          <button className="close-popup" onClick={() => setPopupMessage("")}>✖</button>
+          <button className="close-popup" onClick={() => setPopupMessage("")}>
+            ✖
+          </button>
         </div>
       )}
 
       <div className={`calendar-layout ${isMobile ? "mobile" : isTablet ? "tablet" : "desktop"}`}>
         {isMobile && showUpcoming && <div className="overlay" onClick={() => setShowUpcoming(false)} />}
-        <div className={`upcoming-sidebar ${showUpcoming ? "open" : ""}`} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`upcoming-sidebar ${showUpcoming ? "open" : ""}`}
+          onClick={(e) => e.stopPropagation()}
+        >
           <UpcomingAppointments appointments={upcomingAppointments} onEdit={handleEditUpcoming} />
         </div>
 
         <div className="calendar-main">
           <header className="calendar-header">
-            {isMobile && <button className="hamburger-btn" onClick={() => setShowUpcoming(true)}>☰</button>}
+            {isMobile && (
+              <button className="hamburger-btn" onClick={() => setShowUpcoming(true)}>
+                ☰
+              </button>
+            )}
             {!isMobile && (
-              <button className="toggle-upcoming-btn" onClick={() => setShowUpcoming(!showUpcoming)}>
+              <button
+                className="toggle-upcoming-btn"
+                onClick={() => setShowUpcoming(!showUpcoming)}
+              >
                 <span style={{ fontSize: "1.2rem", marginRight: "6px" }}>📌</span>
                 {showUpcoming ? "Hide Upcoming Appointments" : "Show Upcoming Appointments"}
               </button>
@@ -258,36 +276,78 @@ const CalendarPage = ({ setIsAuthenticated }) => {
             <div className="center-section">
               <h1>Appointment Calendar</h1>
               <div className="date-navigation">
-                <button onClick={() => setSelectedDate(moment(selectedDate).subtract(1, "day").toDate())}>&lt;</button>
+                <button
+                  onClick={() =>
+                    setSelectedDate(moment(selectedDate).subtract(1, "day").toDate())
+                  }
+                >
+                  &lt;
+                </button>
                 <span>{moment(selectedDate).format("YYYY-MM-DD")}</span>
-                <button onClick={() => setSelectedDate(moment(selectedDate).add(1, "day").toDate())}>&gt;</button>
-                <button onClick={() => setSelectedDate(new Date())} style={{ marginLeft: "10px" }}>Today</button>
+                <button
+                  onClick={() =>
+                    setSelectedDate(moment(selectedDate).add(1, "day").toDate())
+                  }
+                >
+                  &gt;
+                </button>
+                <button
+                  onClick={() => setSelectedDate(new Date())}
+                  style={{ marginLeft: "10px" }}
+                >
+                  Today
+                </button>
               </div>
             </div>
             <div className="right-section">
-              <ThemeToggle darkMode={darkMode} toggleDarkMode={() => { setDarkMode(!darkMode); document.body.classList.toggle("dark-mode"); }} />
-              <button className="add-appointment-btn" onClick={() => { setSelectedAppointment(null); setSelectedTimeSlot(null); setShowModal(true); }}>
+              <ThemeToggle
+                darkMode={darkMode}
+                toggleDarkMode={() => {
+                  setDarkMode(!darkMode);
+                  document.body.classList.toggle("dark-mode");
+                }}
+              />
+              <button
+                className="add-appointment-btn"
+                onClick={() => {
+                  setSelectedAppointment(null);
+                  setSelectedTimeSlot(null);
+                  setShowModal(true);
+                }}
+              >
                 <span className="plus-icon">+</span>
                 <span className="btn-text">Add Appointment</span>
               </button>
-              <button className="logout-btn" onClick={handleLogout}>
-                <span className="logout-icon" style={{ fontSize: "18px", marginRight: "4px" }}>🔒</span>
-                <span className="btn-text">Logout</span>
+              {/* ✅ Replaced Logout button with Profile Icon */}
+              <button className="profile-btn" onClick={handleLogout}>
+                <span className="profile-icon" style={{ fontSize: "20px" }}>👤</span>
               </button>
             </div>
           </header>
 
           <div className="calendar-controls">
             <div className="date-selector">
-              <input type="date" value={selectedDate.toISOString().split("T")[0]} onChange={(e) => setSelectedDate(new Date(e.target.value))} />
+              <input
+                type="date"
+                value={selectedDate.toISOString().split("T")[0]}
+                onChange={(e) => setSelectedDate(new Date(e.target.value))}
+              />
             </div>
             <CalendarViewSelector currentView={calendarView} onViewChange={handleViewChange} />
           </div>
 
           {loading ? (
-            <div className="loading-container"><p>Loading appointments...</p></div>
+            <div className="loading-container">
+              <p>Loading appointments...</p>
+            </div>
           ) : (
-            <TimeSlotGrid appointments={getFilteredAppointments()} selectedDate={selectedDate} onSlotClick={handleSlotClick} view={calendarView} onMoveAppointment={handleMoveAppointment} />
+            <TimeSlotGrid
+              appointments={getFilteredAppointments()}
+              selectedDate={selectedDate}
+              onSlotClick={handleSlotClick}
+              view={calendarView}
+              onMoveAppointment={handleMoveAppointment}
+            />
           )}
         </div>
       </div>

@@ -37,12 +37,17 @@ namespace Backend.Controllers
             return user.Id;
         }
 
-        // GET: api/appointments/upcoming
+        // GET: api/appointments/upcoming?start=2024-01-01&end=2024-01-31
         [HttpGet("upcoming")]
-        public async Task<IActionResult> GetUpcomingAppointments()
+        public async Task<IActionResult> GetUpcomingAppointments([FromQuery] DateTime? start, [FromQuery] DateTime? end)
         {
             var userId = await GetUserIdAsync();
-            var appointments = await _appointmentBL.GetAppointmentsByUserAsync(userId);
+            
+            // Default to 7 days if dates not provided
+            var startDate = start ?? DateTime.UtcNow.Date;
+            var endDate = end ?? DateTime.UtcNow.Date.AddDays(7);
+            
+            var appointments = await _appointmentBL.GetAppointmentsByDateRangeAsync(userId, startDate, endDate);
             return Ok(appointments);
         }
 

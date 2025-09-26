@@ -1,5 +1,6 @@
 import React from "react";
 import "../styles/TimeSlotGrid.css";
+import moment from "moment";
 
 const TimeSlotGrid = ({ appointments, selectedDate, onSlotClick, view, onMoveAppointment }) => {
   const normalizedAppointments = normalizeAppointments(appointments);
@@ -34,8 +35,9 @@ const renderDayView = (appointments, selectedDate, onSlotClick, onMoveAppointmen
     timeSlots.push(`${hh}:30`);
   }
 
-  const dateString = selectedDate.toISOString().split("T")[0];
-  const appointmentsForDay = appointments.filter((a) => a.date === dateString);
+  console.log(appointments);
+
+  const appointmentsForDay = appointments.filter((a) => moment(a.startTime).format("YYYY-MM-DD") === moment(selectedDate).format("YYYY-MM-DD"));
 
   const handleDrop = (e, newTime) => {
     e.preventDefault();
@@ -43,7 +45,7 @@ const renderDayView = (appointments, selectedDate, onSlotClick, onMoveAppointmen
     const appointmentId = e.dataTransfer.getData("appointmentId");
     if (appointmentId && onMoveAppointment) {
       // ✅ Pass to parent handler and let it handle conflicts
-      onMoveAppointment(appointmentId, dateString, newTime);
+      onMoveAppointment(appointmentId, moment(selectedDate).format("YYYY-MM-DD"), newTime);
     }
   };
 

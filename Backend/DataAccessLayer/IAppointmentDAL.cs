@@ -7,6 +7,7 @@ namespace Backend.DataAccessLayer
     public interface IAppointmentDAL
     {
         Task<IEnumerable<Appointment>> GetAppointmentsByUserAsync(int userId);
+        Task<IEnumerable<Appointment>> GetAppointmentsByDateRangeAsync(int userId, DateTime startDate, DateTime endDate);
         Task<Appointment> GetAppointmentByIdAsync(int id);
         Task AddAppointmentAsync(Appointment appointment);
         Task UpdateAppointmentAsync(Appointment appointment);

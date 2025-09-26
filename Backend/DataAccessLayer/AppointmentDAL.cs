@@ -66,5 +66,15 @@ namespace Backend.DataAccessLayer
                     (appointment.StartTime < a.EndTime && appointment.EndTime > a.StartTime)
                 );
         }
+
+        public async Task<IEnumerable<Appointment>> GetAppointmentsByDateRangeAsync(int userId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.Appointments
+                .Where(a => a.UserId == userId && 
+                            a.StartTime >= startDate && 
+                            a.StartTime <= endDate.AddDays(1)) // Add 1 day to include the entire end date
+                .OrderBy(a => a.StartTime)
+                .ToListAsync();
+        }
     }
 }

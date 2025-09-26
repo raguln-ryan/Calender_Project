@@ -13,7 +13,7 @@ api.interceptors.request.use(
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("Token attached:", token); // debug
+      // console.log("Token attached:", token); // debug
     } else {
       console.log("No token found in localStorage");
     }
@@ -66,9 +66,9 @@ export const createAppointment = async (data) =>
 export const getAppointmentsByDate = async (date) =>
   handleRequest(() => api.get(`/appointments?date=${date}`));
 
-export const getUpcomingAppointments = async (days = 7) => {
-  const today = new Date().toISOString().split("T")[0];
-  const endDate = new Date();
+export const getUpcomingAppointments = async (days = 7, start = new Date(), endDateParams = new Date()) => {
+  const today = new Date(start).toISOString().split("T")[0];
+  const endDate = new Date(endDateParams);
   endDate.setDate(endDate.getDate() + days);
   const end = endDate.toISOString().split("T")[0];
   return handleRequest(() => api.get(`/appointments/upcoming?start=${today}&end=${end}`));
